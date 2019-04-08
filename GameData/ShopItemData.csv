@@ -1,0 +1,6 @@
+Name,ItemName,ItemPrice,ItemExplanation,ItemType,ItemImagePath
+1,M4A1,200,This is M4A1.,Weapon,Texture2D'/Game/GameData/ShopItemImage/T_SHOP_M4A1.T_SHOP_M4A1'
+2,AK-47,150,THis is AK-47.,Weapon,Texture2D'/Game/GameData/ShopItemImage/T_SHOP_AK47.T_SHOP_AK47'
+3,Bandage,2,RecoveryHealth 10points,Recovery,Texture2D'/Game/GameData/ShopItemImage/T_SHOP_AK47.T_SHOP_AK47'
+4,FirstaidKit,30,RecoveryHealth 100points,Recovery,Texture2D'/Game/GameData/ShopItemImage/T_SHOP_AK47.T_SHOP_AK47'
+5,EnergyDrink,2,Doping 30points,Doping,Texture2D'/Game/GameData/ShopItemImage/T_SHOP_AK47.T_SHOP_AK47'
