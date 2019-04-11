@@ -19,9 +19,14 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void SetupInputComponent() override;
+
 public:
 	class ABGHUD* GetBGHUD() const;
 	
+protected:
+	void ToggleInventory();
+
 protected:
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
 	//TSubclassOf<class UBGUserWidget> HUDWidgetClass;

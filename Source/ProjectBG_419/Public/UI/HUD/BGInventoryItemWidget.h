@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = InventoryItem)
 	void SetUIProperties();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = InventoryItem)
+	void UpdateItemInfo();
+
 protected:
 	
 

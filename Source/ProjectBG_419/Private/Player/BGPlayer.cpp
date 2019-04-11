@@ -230,7 +230,7 @@ void ABGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//PlayerInputComponent->BindAction(TEXT("Slot3"), IE_Pressed, this, &ABGPlayer::Slot3);
 	//PlayerInputComponent->BindAction(TEXT("Slot4"), IE_Pressed, this, &ABGPlayer::Slot4);
 	//PlayerInputComponent->BindAction(TEXT("Slot5"), IE_Pressed, this, &ABGPlayer::Slot5);
-	PlayerInputComponent->BindAction(TEXT("Inventory"), IE_Pressed, this, &ABGPlayer::ToggleInventory);
+	//PlayerInputComponent->BindAction(TEXT("Inventory"), IE_Pressed, this, &ABGPlayer::ToggleInventory);
 
 
 	//For Debug
@@ -737,7 +737,7 @@ void ABGPlayer::DropWeapon()
 				auto BGGameInstance = Cast<UBGGameInstance>(GetGameInstance());
 				if (BGGameInstance)
 				{
-					auto PickupMesh = BGGameInstance->GetStaticMesh(CurrentWeapon->GetWeaponName().ToString());
+					auto PickupMesh = BGGameInstance->GetStaticMesh(CurrentWeapon->GetWeaponName());
 					if (PickupMesh)
 					{
 						MeshComp->SetStaticMesh(PickupMesh);
@@ -927,10 +927,12 @@ void ABGPlayer::ToggleInventory()
 	if (HUD->IsInventoryOnScreen())
 	{
 		HUD->RemoveInventoryWidgetOnScreen();
+		BGPlayerController->SetInputMode(FInputModeGameOnly());
 	}
 	else
 	{
 		HUD->DrawInventoryWidgetOnScreen();
+		BGPlayerController->SetInputMode(FInputModeUIOnly());
 	}
 }
 

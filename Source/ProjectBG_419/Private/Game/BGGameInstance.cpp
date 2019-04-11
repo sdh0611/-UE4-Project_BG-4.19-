@@ -79,6 +79,21 @@ FBGWeaponData * const UBGGameInstance::GetWeaponDataByRowNumber(int32 RowNumber)
 	return  nullptr;
 }
 
+FBGRecoveryData * const UBGGameInstance::GetRecoveryDataByName(const FString & RecoveryName)
+{
+	TArray<FName> Names = RecoveryDataTable->GetRowNames();
+	for (const auto& Name : Names)
+	{
+		auto Data = RecoveryDataTable->FindRow<FBGRecoveryData>(Name, TEXT(""));
+		if (Data->ItemName.Compare(RecoveryName) == 0)
+		{
+			return Data;
+		}
+	}
+
+	return nullptr;
+}
+
 USkeletalMesh * const UBGGameInstance::GetSkeletalMesh(const FString & AssetName)
 {
 	if (WeaponSKTable.Contains(AssetName))

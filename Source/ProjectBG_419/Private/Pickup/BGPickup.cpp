@@ -12,7 +12,7 @@ ABGPickup::ABGPickup()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
-
+	ItemData = nullptr;
 	bIsActive = true;
 }
 

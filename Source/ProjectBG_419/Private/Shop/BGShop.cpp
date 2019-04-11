@@ -7,9 +7,11 @@
 #include "BGWeapon.h"
 #include "BGWeaponPickup.h"
 #include "BGRecovery.h"
+#include "BGRecoveryPickup.h"
 #include "BGGameInstance.h"
 #include "BGPlayerItemStatusComponent.h"
 #include "BGPlayerController.h"
+#include "BGHUD.h"
 #include "Components/Button.h"
 #include "Components/StaticMeshComponent.h"
 #include "ConstructorHelpers.h"
@@ -33,16 +35,16 @@ ABGShop::ABGShop()
 	}
 
 
-	static ConstructorHelpers::FClassFinder<UBGShopWidget>
-		UI_Shop(TEXT("WidgetBlueprint'/Game/UI/UI_ShopWidget.UI_ShopWidget_C'"));
-	if (UI_Shop.Succeeded())
-	{
-		ShopWidgetClass = UI_Shop.Class;
-	}
-	else
-	{
-		UE_LOG(LogClass, Error, TEXT("Shop ui not exist.."));
-	}
+	//static ConstructorHelpers::FClassFinder<UBGShopWidget>
+	//	UI_Shop(TEXT("WidgetBlueprint'/Game/UI/UI_ShopWidget.UI_ShopWidget_C'"));
+	//if (UI_Shop.Succeeded())
+	//{
+	//	ShopWidgetClass = UI_Shop.Class;
+	//}
+	//else
+	//{
+	//	UE_LOG(LogClass, Error, TEXT("Shop ui not exist.."));
+	//}
 
 
 	static ConstructorHelpers::FObjectFinder<UDataTable>
@@ -82,21 +84,37 @@ void ABGShop::OnInteraction(APawn* Pawn)
 	//Activate shop UI
 	if (Player)
 	{
-		if (ShopWidgetClass)
+		auto PlayerController = Cast<ABGPlayerController>(Player->GetController());
+		if (PlayerController)
 		{
-			auto PlayerController = Cast<APlayerController>(Player->GetController());
-			if (PlayerController)
+			auto HUD = PlayerController->GetBGHUD();
+			if (HUD)
 			{
-				ConstructShopWidget(PlayerController);
-				PlayerController->bShowMouseCursor = true;
-				PlayerController->SetInputMode(FInputModeUIOnly());
-				EnterPlayer = Player;
+				if (!HUD->IsShopOnScreen())
+				{
+					HUD->DrawShopWidgetOnScreen();
+					HUD->GetShopWidget()->BindShopPointer(this);
+					ConstructShopWidget(PlayerController);					
+					EnterPlayer = Player;
+				}
 			}
 		}
-		else
-		{
-			UE_LOG(LogClass, Error, TEXT("Shop ui invalid."));
-		}
+
+		//if (ShopWidgetClass)
+		//{
+		//	auto PlayerController = Cast<APlayerController>(Player->GetController());
+		//	if (PlayerController)
+		//	{
+		//		ConstructShopWidget(PlayerController);
+		//		PlayerController->bShowMouseCursor = true;
+		//		PlayerController->SetInputMode(FInputModeUIOnly());
+		//		EnterPlayer = Player;
+		//	}
+		//}
+		//else
+		//{
+		//	UE_LOG(LogClass, Error, TEXT("Shop ui invalid."));
+		//}
 	}
 
 
@@ -118,7 +136,6 @@ void ABGShop::SoldToPlayer(const FBGShopItemData& NewShopItem)
 			//가격만큼 Player소유의 돈에서 뺌.
 			PlayerItemStatus->AddMoney(-1*NewShopItem.ItemPrice);
 
-			//일단 Weapon만 테스트
 			switch (GetItemTypeFromString(NewShopItem.ItemType))
 			{
 			case EItemType::WEAPON: //Player buy weapon
@@ -136,11 +153,30 @@ void ABGShop::SoldToPlayer(const FBGShopItemData& NewShopItem)
 						EnterPlayer->EquipWeapon(NewWeapon);
 					}
 				}
+				else
+				{
+					UE_LOG(LogClass, Warning, TEXT("Sell Weapon Fail!!!!"));
+				}
 				break;
 			}
 			case EItemType::RECOVERY: //Player buy recovery
 			{
+				ABGRecovery* NewRecovery = GetWorld()->SpawnActor<ABGRecovery>(RecoveryItemClass);
+				if (NewRecovery)
+				{
+					UBGGameInstance* GameInstance = Cast<UBGGameInstance>(GetGameInstance());
+					if (GameInstance)
+					{
+						NewRecovery->InitItemData(GameInstance->GetRecoveryDataByName(NewShopItem.ItemName));
+						NewRecovery->PickupClass = ABGRecoveryPickup::StaticClass();
+						auto ItemStatus = EnterPlayer->GetPlayerItemStatusComponent();
+						if (ItemStatus)
+						{
+							ItemStatus->AddItem(NewRecovery);
+						}
 
+					}
+				}
 				break;
 			}
 			case EItemType::DOPING: //Player buy doping
@@ -192,11 +228,9 @@ const FBGShopItemData * const ABGShop::FindShopItemData(const FString & ItemName
 	return nullptr;
 }
 
-void ABGShop::ConstructShopWidget(APlayerController* PlayerController)
+void ABGShop::ConstructShopWidget(ABGPlayerController* PlayerController)
 {
-	//if (nullptr == ShopWidget)
-	//{
-	ShopWidget = CreateWidget<UBGShopWidget>(PlayerController, ShopWidgetClass);
+	auto ShopWidget = PlayerController->GetBGHUD()->GetShopWidget();
 
 	TArray<FName> Names = ShopItemDataTable->GetRowNames();
 
@@ -206,14 +240,20 @@ void ABGShop::ConstructShopWidget(APlayerController* PlayerController)
 		FBGShopItemData* ShopItem = ShopItemDataTable->FindRow<FBGShopItemData>(*NameIt, TEXT(""));
 		ShopWidget->AddItemRow(ShopItem);
 	}
+	
+	//ShopWidget = CreateWidget<UBGShopWidget>(PlayerController, ShopWidgetClass);
 
-	ShopWidget->AddToViewport();
-	ShopWidget->BindShopPointer(this);
+	//TArray<FName> Names = ShopItemDataTable->GetRowNames();
 
-	//}
-	//else
+	//for (auto NameIt = Names.CreateConstIterator(); NameIt; ++NameIt)
 	//{
-	//	ShopWidget->AddToViewport();
+	//	//Add ItemData in shop widget
+	//	FBGShopItemData* ShopItem = ShopItemDataTable->FindRow<FBGShopItemData>(*NameIt, TEXT(""));
+	//	ShopWidget->AddItemRow(ShopItem);
 	//}
+
+	//ShopWidget->AddToViewport();
+	//ShopWidget->BindShopPointer(this);
+
 }
 

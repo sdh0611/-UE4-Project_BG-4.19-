@@ -41,6 +41,9 @@ public:
 	TSubclassOf<class ABGItem> ItemClass;
 
 protected:
+	FBGItemData* ItemData;
+
+protected:
 	UPROPERTY(VisibleAnywhere, Category = Weapon, Meta = (AllowPrivateAccess = true))
 	class UStaticMeshComponent* Mesh;
 

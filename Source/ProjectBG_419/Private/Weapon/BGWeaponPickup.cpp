@@ -19,7 +19,7 @@ ABGWeaponPickup::ABGWeaponPickup()
 	//}
 
 	ItemClass = ABGWeapon::StaticClass();
-	WeaponData = nullptr;
+	//WeaponData = nullptr;
 	Weapon = nullptr;
 }
 
@@ -32,10 +32,12 @@ void ABGWeaponPickup::PostInitializeComponents()
 	if (GameInstance)
 	{
 		int32 Num = FMath::RandRange(1.f, (float)(GameInstance->GetSkeletalMeshTableSize()+1));
-		WeaponData = GameInstance->GetWeaponDataByRowNumber(Num);
-		if (WeaponData)
+		auto NewWeaponData = GameInstance->GetWeaponDataByRowNumber(Num);
+		if (NewWeaponData)
 		{
-			auto StaticMesh = GameInstance->GetStaticMesh(WeaponData->ItemName);
+			ItemData = NewWeaponData;
+
+			auto StaticMesh = GameInstance->GetStaticMesh(ItemData->ItemName);
 			if (StaticMesh)
 			{
 				UE_LOG(LogClass, Warning, TEXT("Init PickupMesh!"));
@@ -60,7 +62,7 @@ void ABGWeaponPickup::OnInteraction(APawn* Pawn)
 		else
 		{
 			Weapon = GetWorld()->SpawnActor<ABGWeapon>(ItemClass);
-			Weapon->InitItemData(WeaponData);
+			Weapon->InitItemData(ItemData);
 		}
 		Player->EquipWeapon(Weapon);
 		//Weapon->SetWeaponOwner(Player);

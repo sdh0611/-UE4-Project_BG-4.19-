@@ -27,7 +27,7 @@ public:
 	bool GetAssetPath(const FString& AssetName, FSoftObjectPath& AssetPath);
 	FBGWeaponData* const GetWeaponDataByName(const FString& WeaponName);
 	FBGWeaponData* const GetWeaponDataByRowNumber(int32 RowNumber);
-
+	FBGRecoveryData* const GetRecoveryDataByName(const FString& RecoveryName);
 
 public:
 	class USkeletalMesh* const GetSkeletalMesh(const FString& AssetName);
@@ -53,5 +53,9 @@ private:
 
 	UPROPERTY()
 	class UDataTable* WeaponDataTable;
+
+	UPROPERTY()
+	class UDataTable* RecoveryDataTable;
+
 
 };

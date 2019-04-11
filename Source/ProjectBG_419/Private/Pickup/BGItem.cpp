@@ -14,7 +14,7 @@ ABGItem::ABGItem()
 	ItemOwner = nullptr;
 	NumberOfItem = 1;
 	ItemWeight = 0;
-	ItemName = FName(TEXT("Default"));
+	ItemName = TEXT("Default");
 	ItemType = EItemType::DEFAULT;
 }
 
@@ -41,6 +41,7 @@ void ABGItem::OnUsed()
 	else
 	{
 		--NumberOfItem;
+		OnItemInfoChanged.Execute();
 	}
 }
 
@@ -49,13 +50,15 @@ void ABGItem::IncreaseItemNumber(int32 Value)
 	int32 NewNumberOfItem = NumberOfItem + Value;
 
 	NumberOfItem = FMath::Clamp<int32>(NewNumberOfItem, 0, NewNumberOfItem);
+
+	OnItemInfoChanged.Execute();
 }
 
 void ABGItem::InitItemData(FBGItemData * NewItemData)
 {
 	if (NewItemData)
 	{
-		ItemName = *NewItemData->ItemName;
+		ItemName = NewItemData->ItemName;
 		ItemType = GetItemTypeFromString(NewItemData->ItemType);
 		ItemWeight = NewItemData->ItemWeight;
 	}
@@ -96,7 +99,7 @@ int32 ABGItem::GetItemWeight() const
 	return ItemWeight;
 }
 
-const FName & ABGItem::GetItemName() const
+const FString& ABGItem::GetItemName() const
 {
 	return ItemName;
 }

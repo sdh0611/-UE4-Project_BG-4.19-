@@ -23,7 +23,7 @@ struct FBGItemData : public FTableRowBase
 
 public:
 	FBGItemData()
-		:ItemName(TEXT("Default")), ItemType(TEXT("DEFAULT")), ItemWeight(0), ItemImagePath(TEXT(""))
+		:ItemName(TEXT("Default")), ItemType(TEXT("DEFAULT")), ItemWeight(0), ItemImagePath(TEXT("")), StaticMeshPath(TEXT(""))
 	{
 	}
 
@@ -38,6 +38,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = ItemData)
 	FString ItemImagePath;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = WeaponData)
+	FString StaticMeshPath;
 };
 
 USTRUCT(BlueprintType)
@@ -47,8 +50,7 @@ struct FBGWeaponData : public FBGItemData
 
 public:
 	FBGWeaponData()
-		: FBGItemData(), Damage(0.f), FireDelay(0.f), MaxAmmo(30), WeaponType(TEXT("Default")),
-		StaticMeshPath(TEXT("")), SkeletalMeshPath(TEXT(""))
+		: FBGItemData(), Damage(0.f), FireDelay(0.f), MaxAmmo(30), WeaponType(TEXT("Default")), SkeletalMeshPath(TEXT(""))
 	{
 	}
 
@@ -64,8 +66,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = WeaponData)
 	FString WeaponType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = WeaponData)
-	FString StaticMeshPath;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = WeaponData)
+	//FString StaticMeshPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = WeaponData)
 	FString SkeletalMeshPath;

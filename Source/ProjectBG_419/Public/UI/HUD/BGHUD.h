@@ -23,16 +23,20 @@ public:
 	
 public:
 	void DrawInventoryWidgetOnScreen();
+	void DrawShopWidgetOnScreen();
 	void RemoveInventoryWidgetOnScreen();
+	void RemoveShopWidgetOnScreen();
 
 public:
 	bool IsInventoryOnScreen() const;
-	class UBGUserWidget* GetUserWidget() const;
-	class UBGInventoryWidget* GetInventoryWidget() const;
-
+	bool IsShopOnScreen() const;
+	class UBGUserWidget* const GetUserWidget() const;
+	class UBGShopWidget* const GetShopWidget() const;
+	class UBGInventoryWidget* const GetInventoryWidget() const;
 
 protected:
 	bool bIsInventoryOnScreen;
+	bool bIsShopOnScreen;
 
 protected:
 	//UPROPERTY(EditDefaultsOnly)
@@ -41,6 +45,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = HUD)
 	TSubclassOf<class UBGUserWidget> UserWidgetClass;
 	
+	UPROPERTY(VisibleAnywhere, Category = HUD)
+	TSubclassOf<class UBGShopWidget> ShopWidgetClass;
+
 	UPROPERTY(VisibleAnywhere, Category = HUD)
 	TSubclassOf<class UBGInventoryWidget> InventoryWidgetClass;
 
@@ -53,6 +60,9 @@ private:
 	//Widget classes
 	UPROPERTY()
 	class UBGUserWidget* UserWidget;
+
+	UPROPERTY()
+	class UBGShopWidget* ShopWidget;
 
 	UPROPERTY()
 	class UBGInventoryWidget* InventoryWidget;

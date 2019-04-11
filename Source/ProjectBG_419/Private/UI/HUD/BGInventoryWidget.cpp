@@ -65,6 +65,7 @@ void UBGInventoryWidget::AddItemToInventoryWidget(class APlayerController* Playe
 			ItemHolder->AddChild(NewInventoryItem);
 			NewInventoryItem->BindItemPointer(NewItem);
 			NewInventoryItem->SetPadding(10.f);
+			NewItem->OnItemInfoChanged.BindUObject(NewInventoryItem, &UBGInventoryItemWidget::UpdateItemInfo);
 		}
 		else
 		{

@@ -55,6 +55,6 @@ protected:
 	class UButton* ShopExitButton;
 
 	UPROPERTY()
-	class ABGShop* Shop;
+	TWeakObjectPtr<ABGShop> Shop;
 
 };

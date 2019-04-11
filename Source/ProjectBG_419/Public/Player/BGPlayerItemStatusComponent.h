@@ -34,7 +34,7 @@ public:
 
 public:
 	int32 GetCurrentMoney() const;
-	class ABGItem* const IsContainItem(TSubclassOf<class ABGItem> ItemClassInfo);
+	class ABGItem* const GetItemByName(const FString& ItemName);
 
 public:
 	FOnMoneyChanged OnMoneyChanged;

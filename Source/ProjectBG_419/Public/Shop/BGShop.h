@@ -34,7 +34,7 @@ public:
 	const FBGShopItemData* const FindShopItemData(const FString& ItemName);
 
 private:
-	void ConstructShopWidget(class APlayerController* PlayerController);
+	void ConstructShopWidget(class ABGPlayerController* PlayerController);
 
 private:
 	//TSubclassOf<class ABGWeapon> WeaponClass;
@@ -47,11 +47,11 @@ private:
 	UPROPERTY()
 	TArray<class ABGItem*> ItemList;
 	
-	UPROPERTY(VisibleAnywhere, Category = ShopUI)
-	TSubclassOf<class UBGShopWidget> ShopWidgetClass;
-	
-	UPROPERTY(VIsibleAnywhere, Category = ShopUI)
-	class UBGShopWidget* ShopWidget;
+	//UPROPERTY(VisibleAnywhere, Category = ShopUI)
+	//TSubclassOf<class UBGShopWidget> ShopWidgetClass;
+	//
+	//UPROPERTY(VIsibleAnywhere, Category = ShopUI)
+	//class UBGShopWidget* ShopWidget;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Shop)
@@ -60,5 +60,6 @@ private:
 	UPROPERTY()
 	class UDataTable* ShopItemDataTable;
 
+	UPROPERTY()
 	class ABGPlayer* EnterPlayer;
 };

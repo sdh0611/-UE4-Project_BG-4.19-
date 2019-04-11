@@ -145,7 +145,7 @@ public:
 	bool IsNeedToReload() const;
 	int32 GetCurrentAmmo() const;
 	EWeaponType GetWeaponType() const;
-	const FName& GetWeaponName() const;
+	const FString& GetWeaponName() const;
 
 protected:
 	FHitResult WeaponTrace(const FVector& Start, const FVector& End);
@@ -158,7 +158,7 @@ private:
 public:
 	FOnWeaponFire OnWeaponFire;
 	FOnCurrentAmmoVarying OnCurrentAmmoVarying;
-	TSubclassOf <class ABGWeaponPickup > PickupClass;
+	//TSubclassOf <class ABGWeaponPickup > PickupClass;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Weapon)

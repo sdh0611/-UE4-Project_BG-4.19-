@@ -36,6 +36,8 @@ ABGWeapon::ABGWeapon()
 	//WeaponStat.MaxAmmo = 30;
 	//WeaponStat.WeaponName = TEXT("M4A1");
 	//WeaponStat.WeaponType = EWeaponType::AR;
+	ItemType = EItemType::WEAPON;
+
 	FireTimer = 0.f;
 	CurrentAmmo = 0;
 	bWantsToFire = false;
@@ -144,7 +146,7 @@ void ABGWeapon::InitItemData(FBGItemData* NewItemData)
 			auto BGGameInstance = Cast<UBGGameInstance>(GetGameInstance());
 			if (BGGameInstance)
 			{
-				auto SkeletalMesh = BGGameInstance->GetSkeletalMesh(ItemName.ToString());
+				auto SkeletalMesh = BGGameInstance->GetSkeletalMesh(ItemName);
 				if (SkeletalMesh)
 				{
 					WeaponMesh->SetSkeletalMesh(SkeletalMesh);
@@ -194,7 +196,7 @@ EWeaponType ABGWeapon::GetWeaponType() const
 	return WeaponType;
 }
 
-const FName & ABGWeapon::GetWeaponName() const
+const FString & ABGWeapon::GetWeaponName() const
 {
 	return ItemName;
 }

@@ -21,6 +21,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void OnInteraction(class APawn* Pawn) override;
 
+private:
+	bool IsPlayerHasItem();
 	
 	
 };

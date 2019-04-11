@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "BGItem.generated.h"
 
+DECLARE_DELEGATE(FOnItemInfoChanged);
+
+
 UENUM(Blueprintable)
 enum class EItemType : uint8
 {
@@ -55,7 +58,6 @@ static EItemType GetItemTypeFromString(const FString& ItemTypeName)
 	return EItemType::INVALID;
 }
 
-
 UCLASS()
 class PROJECTBG_419_API ABGItem : public AActor
 {
@@ -91,9 +93,14 @@ public:
 	const ABGPlayer* GetItemOwner() const;
 	int32 GetNumberOfItem() const;
 	int32 GetItemWeight() const;
-	const FName& GetItemName() const;
+	const FString& GetItemName() const;
 	EItemType GetItemType() const;
 
+public:
+	FOnItemInfoChanged OnItemInfoChanged;
+
+	UPROPERTY(VisibleAnywhere, Category = Item)
+	TSubclassOf<class ABGPickup> PickupClass;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Item)
@@ -110,7 +117,7 @@ protected:
 	int32 ItemWeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item)
-	FName ItemName;
+	FString ItemName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item)
 	EItemType ItemType;

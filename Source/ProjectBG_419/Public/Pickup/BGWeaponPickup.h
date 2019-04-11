@@ -32,8 +32,9 @@ public:
 private:
 	//TSubclassOf<class ABGWeapon> WeaponClass;
 	//FWeaponStatData WeaponStatData;
-	struct FBGItemData* WeaponData;
-	TSharedPtr<FBGItemData> WeaponDataPtr;
+	//struct FBGItemData* WeaponData;
+	// Pickup단에서 생성할 Item Actor의 데이터 구조체를 SharedPtr의 형태로 공유할 수 있게끔 수정하자.
+	//TSharedPtr<FBGItemData> WeaponData;
 
 	UPROPERTY(VisibleAnywhere, Category=WeaponPickup)
 	class ABGWeapon* Weapon;

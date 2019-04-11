@@ -4,10 +4,13 @@
 #include "BGShopItemRowWidget.h"
 #include "BGShop.h"
 #include "BGItem.h"
+#include "BGPlayerController.h"
+#include "BGHUD.h"
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
 #include "ConstructorHelpers.h"
 
 UBGShopWidget::UBGShopWidget(const FObjectInitializer & ObjectInitializer)
@@ -44,14 +47,8 @@ void UBGShopWidget::NativeConstruct()
 
 void UBGShopWidget::BindShopPointer(ABGShop * NewShop)
 {
-	if (nullptr == NewShop)
-	{
-		UE_LOG(LogClass, Warning, TEXT("Invalid value in BindShopPointer."));
-	}
-	else
-	{
-		Shop = NewShop;
-	}
+	Shop = NewShop;
+
 }
 
 void UBGShopWidget::AddItemRow(FBGShopItemData * NewItemData)
@@ -99,10 +96,34 @@ void UBGShopWidget::BeginDestroy()
 
 void UBGShopWidget::OnExitButtonClicked()
 {
-	GetOwningPlayer()->bShowMouseCursor = false;
-	GetOwningPlayer()->SetInputMode(FInputModeGameOnly());
-	Shop->OnPlayerExitShop();
-	RemoveFromParent();
+	auto PlayerController = Cast<ABGPlayerController>(GetOwningPlayer());
+	if (PlayerController)
+	{
+		auto WidgetSwitcher = Cast<UWidgetSwitcher>(GetWidgetFromName(TEXT("ShopWidgetSwitcher")));
+		if (WidgetSwitcher)
+		{
+			int32 Num = WidgetSwitcher->GetNumWidgets();
+			for (int32 WidgetIndex = 0; WidgetIndex < Num; ++WidgetIndex)
+			{
+				auto ItemHolder = Cast<UScrollBox>(WidgetSwitcher->GetWidgetAtIndex(WidgetIndex));
+				if (ItemHolder)
+				{
+					ItemHolder->ClearChildren();
+				}
+			}
+
+		}
+
+		if (Shop.IsValid())
+		{
+			Shop->OnPlayerExitShop();
+		}
+		PlayerController->GetBGHUD()->RemoveShopWidgetOnScreen();
+	}
+	//GetOwningPlayer()->bShowMouseCursor = false;
+	//GetOwningPlayer()->SetInputMode(FInputModeGameOnly());
+
+	//RemoveFromParent();
 }
 
 //void UBGShopWidget::OnBuyButtonClicked()

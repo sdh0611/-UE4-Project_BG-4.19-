@@ -3,6 +3,7 @@
 #include "BGHUD.h"
 #include "BGUserWidget.h"
 #include "BGInventoryWidget.h"
+#include "BGShopWidget.h"
 #include "BGPlayerController.h"
 #include "Engine/Canvas.h"
 #include "ConstructorHelpers.h"
@@ -27,6 +28,17 @@ ABGHUD::ABGHUD()
 		UE_LOG(LogClass, Error, TEXT("HUD ui not exist.."));
 	}
 
+	static ConstructorHelpers::FClassFinder<UBGShopWidget>
+		UI_Shop(TEXT("WidgetBlueprint'/Game/UI/UI_ShopWidget.UI_ShopWidget_C'"));
+	if (UI_Shop.Succeeded())
+	{
+		ShopWidgetClass = UI_Shop.Class;
+	}
+	else
+	{
+		UE_LOG(LogClass, Error, TEXT("Shop ui not exist.."));
+	}
+
 	static ConstructorHelpers::FClassFinder<UBGInventoryWidget>
 		UI_Inventory(TEXT("WidgetBlueprint'/Game/UI/UI_UserInventory.UI_UserInventory_C'"));
 	if (UI_Inventory.Succeeded())
@@ -40,6 +52,7 @@ ABGHUD::ABGHUD()
 
 	PlayerController = nullptr;
 	bIsInventoryOnScreen = false;
+	bIsShopOnScreen = false;
 
 }
 
@@ -48,10 +61,15 @@ void ABGHUD::BeginPlay()
 {
 	PlayerController = Cast<ABGPlayerController>(PlayerOwner);
 	
+	//Pooling widgets
 	if (PlayerController)
 	{
 		UserWidget = CreateWidget<UBGUserWidget>(PlayerController, UserWidgetClass);
 		UserWidget->AddToViewport();
+
+		ShopWidget = CreateWidget<UBGShopWidget>(PlayerController, ShopWidgetClass);
+		ShopWidget->AddToViewport();
+		ShopWidget->SetVisibility(ESlateVisibility::Hidden);
 
 		InventoryWidget = CreateWidget<UBGInventoryWidget>(PlayerController, InventoryWidgetClass);
 		InventoryWidget->AddToViewport();
@@ -83,29 +101,52 @@ void ABGHUD::DrawHUD()
 
 void ABGHUD::DrawInventoryWidgetOnScreen()
 {
-	//if (nullptr == InventoryWidget)
-	{
-		//InventoryWidget = CreateWidget<UBGInventoryWidget>(PlayerController, InventoryWidgetClass);
-		//InventoryWidget->AddToViewport();
-		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-	}
-	//else
-	//{
-	//	InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-	//}
 
+	InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(GetInventoryWidget()->GetCachedWidget());
+	PlayerController->SetInputMode(InputMode);
 	PlayerController->bShowMouseCursor = true;
 
 	bIsInventoryOnScreen = true;
+
+}
+
+void ABGHUD::DrawShopWidgetOnScreen()
+{
+	ShopWidget->SetVisibility(ESlateVisibility::Visible);
+	
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(GetShopWidget()->GetCachedWidget());
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = true;
+
+	bIsShopOnScreen = true;
+
 }
 
 void ABGHUD::RemoveInventoryWidgetOnScreen()
 {
 	//InventoryWidget->RemoveFromParent();
 	InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	PlayerController->SetInputMode(FInputModeGameOnly());
 	PlayerController->bShowMouseCursor = false;
 
 	bIsInventoryOnScreen = false;
+
+}
+
+void ABGHUD::RemoveShopWidgetOnScreen()
+{
+	ShopWidget->SetVisibility(ESlateVisibility::Hidden);
+	
+	PlayerController->SetInputMode(FInputModeGameOnly());
+	PlayerController->bShowMouseCursor = false;
+
+	bIsShopOnScreen = false;
+
 }
 
 bool ABGHUD::IsInventoryOnScreen() const
@@ -113,12 +154,22 @@ bool ABGHUD::IsInventoryOnScreen() const
 	return bIsInventoryOnScreen;
 }
 
-UBGUserWidget * ABGHUD::GetUserWidget() const
+bool ABGHUD::IsShopOnScreen() const
+{
+	return bIsShopOnScreen;
+}
+
+UBGUserWidget * const ABGHUD::GetUserWidget() const
 {
 	return UserWidget;
 }
 
-UBGInventoryWidget * ABGHUD::GetInventoryWidget() const
+UBGShopWidget * const ABGHUD::GetShopWidget() const
+{
+	return ShopWidget;
+}
+
+UBGInventoryWidget * const ABGHUD::GetInventoryWidget() const
 {
 	return InventoryWidget;
 }

@@ -50,14 +50,25 @@ void UBGPlayerItemStatusComponent::AddItem(ABGItem * NewItem)
 {
 	if (NewItem)
 	{
-		ItemList.Add(NewItem);
 		CurrentWeight += NewItem->GetItemWeight();
-		//Add to inventory
+		// 해당 아이템이 이미 List에 존재하면 개수 증가,
+		// 없는 경우 List에 추가해줌.
+		auto Item = GetItemByName(NewItem->GetItemName());
+		if (Item)
+		{
+			Item->IncreaseItemNumber(NewItem->GetNumberOfItem());
+		}
+		else
+		{
+			ItemList.Add(NewItem);
+		}
+
+		// Update InventoryWIdget
 		auto PlayerController = Cast<ABGPlayerController>(OwnerPlayer->GetController());
 		if (PlayerController)
 		{
 			auto InventoryWIdget = Cast<UBGInventoryWidget>(PlayerController->GetBGHUD()->GetInventoryWidget());
-			if (InventoryWIdget)
+			if (InventoryWIdget && (nullptr == Item))
 			{
 				InventoryWIdget->AddItemToInventoryWidget(PlayerController, NewItem);
 			}
@@ -87,16 +98,16 @@ int32 UBGPlayerItemStatusComponent::GetCurrentMoney() const
 	return CurrentMoney;
 }
 
-class ABGItem* const UBGPlayerItemStatusComponent::IsContainItem(TSubclassOf<class ABGItem> ItemClassInfo)
+ABGItem * const UBGPlayerItemStatusComponent::GetItemByName(const FString & ItemName)
 {
 	for (const auto& Item : ItemList)
 	{
-		if(Item->StaticClass() == ItemClassInfo)
+		if (Item->GetItemName().Equals(ItemName))
 		{
 			return Item;
 		}
 	}
-	
+
 	return nullptr;
 }
 

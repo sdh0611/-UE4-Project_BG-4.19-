@@ -10,6 +10,7 @@ ABGRecovery::ABGRecovery()
 	RecoveryAmount = 30;
 	RecoveryDelay = 0.f;
 	ItemName = TEXT("Recovery");
+	ItemType = EItemType::RECOVERY;
 }
 
 void ABGRecovery::OnUsed()

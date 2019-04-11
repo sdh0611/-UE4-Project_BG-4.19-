@@ -3,6 +3,7 @@
 #include "BGPlayerController.h"
 #include "BGUserWidget.h"
 #include "BGShopWidget.h"
+#include "BGInventoryWidget.h"
 #include "BGHUD.h"
 #include "BGPlayerCameraManager.h"
 #include "ConstructorHelpers.h"
@@ -35,13 +36,37 @@ void ABGPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetInputMode(FInputModeGameOnly());
 	//HUDWidget = CreateWidget<UBGUserWidget>(this, HUDWidgetClass);
 	//HUDWidget->AddToViewport();
 
 	//SetView
 }
 
+void ABGPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	InputComponent->BindAction(TEXT("Inventory"), IE_Pressed, this, &ABGPlayerController::ToggleInventory);
+
+
+}
+
 ABGHUD * ABGPlayerController::GetBGHUD() const
 {
 	return Cast<ABGHUD>(GetHUD());
+}
+
+void ABGPlayerController::ToggleInventory()
+{
+	UE_LOG(LogClass, Warning, TEXT("ToggleInventory"));
+	auto HUD = GetBGHUD();
+	if (HUD->IsInventoryOnScreen())
+	{
+		HUD->RemoveInventoryWidgetOnScreen();
+	}
+	else
+	{
+		HUD->DrawInventoryWidgetOnScreen();
+	}
 }
