@@ -118,7 +118,7 @@ ABGPlayer::ABGPlayer()
 	DirectionVector = FVector::ZeroVector;
 	Rotation = FRotator::ZeroRotator;
 
-	WeaponInventory.Init(nullptr, 5);
+	//WeaponInventory.Init(nullptr, 5);
 }
 
 // Called when the game starts or when spawned
@@ -309,83 +309,26 @@ void ABGPlayer::EquipWeapon(ABGWeapon * NewWeapon)
 
 	//Set weapon owner
 	NewWeapon->SetItemOwner(this);
-	AnimInstance->SetIsEquipWeapon(true);
 
-	switch(NewWeapon->GetWeaponType())
-	{ 
-		case EWeaponType::PISTOL:
+	ABGWeapon* Weapon = ItemStatusComponent->EquipWeapon(NewWeapon);
+	if (Weapon)
+	{
+		if (nullptr != CurrentWeapon)
 		{
-			break;
+			UE_LOG(LogClass, Warning, TEXT("DropWeapon"));
+			DropWeapon();
 		}
-		case EWeaponType::GRENADE:
-		{
-			break;
-		}
-		default:
-		{
-			//주 무기가 하나도 없다면
-			if ((nullptr == WeaponInventory[0]) && (nullptr == WeaponInventory[1]))
-			{
-				CurrentWeaponIndex = 0;
-				WeaponInventory[CurrentWeaponIndex] = NewWeapon;
-				CurrentWeapon = NewWeapon;
-				UE_LOG(LogClass, Warning, TEXT("Inventory 1!"));
-				NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MainWeaponSocket);
-			}
-			else if (nullptr == WeaponInventory[0] || nullptr == WeaponInventory[1])
-			{
-				//1, 2 슬롯 중 하나만 주무기가 있는 경우
-				if (nullptr == WeaponInventory[0])
-				{
-					WeaponInventory[0] = NewWeapon;
-					if (nullptr == CurrentWeapon)
-					{
-						CurrentWeaponIndex = 0;
-					}
-					UE_LOG(LogClass, Warning, TEXT("Inventory 1-1!"));
-				}
-				else if (nullptr == WeaponInventory[1])
-				{
-					WeaponInventory[1] = NewWeapon;
-					if (nullptr == CurrentWeapon)
-					{
-						CurrentWeaponIndex = 1;
-					}
-					UE_LOG(LogClass, Warning, TEXT("Inventory 1-2!"));
-				}
 
-				if (nullptr == CurrentWeapon)
-				{
-					CurrentWeapon = NewWeapon;
-					NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MainWeaponSocket);
-
-				}
-				else
-				{
-					NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SecondWeaponSocket);
-				}
-			}
-			else
-			{
-				//1, 2 주무기 슬롯이 전부 차 있을 경우
-				//현재 착용중인 무기를 WeaponPickup으로 돌려놓고 CurrentWeapon을 습득한 무기로 교체
-
-			}
-
-			break;
-		}	
+		CurrentWeapon = Weapon;
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MainWeaponSocket);
 	}
-
-
-	//NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, MainWeaponSocket);
-	//if (CurrentWeapon)
-	//{
-	//	UE_LOG(LogClass, Warning, TEXT("Attach Second Weapon!"));
-	//	PreviousWeapon = CurrentWeapon;
-	//	CurrentWeapon = NewWeapon;
-	//	PreviousWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SecondWeaponSocket);
-	//}
-	//CurrentWeapon = NewWeapon;
+	else
+	{
+		//SecondWeapon Socket에 붙임.
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SecondWeaponSocket);
+	}
+	
+	AnimInstance->SetIsEquipWeapon(true);
 
 	if (BGPlayerController)
 	{
@@ -750,7 +693,7 @@ void ABGPlayer::DropWeapon()
 					MeshComp->SetSimulatePhysics(true);
 					MeshComp->AddTorqueInRadians(FVector(1.f, 1.f, 1.f) * 400000.f);
 					NewWeaponPickup->SetWeapon(CurrentWeapon);
-					RemoveWeapon(CurrentWeapon, false);
+					ItemStatusComponent->RemoveWeapon(CurrentWeapon, false);
 					BGPlayerController->GetBGHUD()->GetUserWidget()->BindWeaponInfo(nullptr);
 					AnimInstance->SetIsEquipWeapon(false);
 					UE_LOG(LogClass, Warning, TEXT("Spawn pickup success."));
@@ -793,10 +736,10 @@ void ABGPlayer::DropWeapon()
 void ABGPlayer::Slot1()
 {
 	UE_LOG(LogClass, Warning, TEXT("Switching Slot1 start."));
-	if (nullptr != WeaponInventory[0])
+	if (nullptr != ItemStatusComponent->GetWeapon(0))
 	{
 		AnimInstance->SetIsEquipWeapon(true);
-		if (CurrentWeaponIndex != 0)
+		if (ItemStatusComponent->GetCurrentWeaponIndex() != 0)
 		{
 			UE_LOG(LogClass, Warning, TEXT("Switching Slot1"));
 			if (IsSprinting())
@@ -811,8 +754,10 @@ void ABGPlayer::Slot1()
 			
 			PreviousWeapon = CurrentWeapon;
 
-			CurrentWeapon = WeaponInventory[0];
-			CurrentWeaponIndex = 0;
+			CurrentWeapon = ItemStatusComponent->GetWeapon(0);
+			ItemStatusComponent->SetCurrentWeaponIndex(0);
+			//CurrentWeaponIndex = 0;
+			//CurrentWeapon = WeaponInventory[0];
 
 			if (BGPlayerController)
 			{
@@ -833,10 +778,10 @@ void ABGPlayer::Slot1()
 void ABGPlayer::Slot2()
 {
 	UE_LOG(LogClass, Warning, TEXT("Switching Slot2 start."));
-	if (nullptr != WeaponInventory[1])
+	if (nullptr != ItemStatusComponent->GetWeapon(1))
 	{
 		AnimInstance->SetIsEquipWeapon(true);
-		if (CurrentWeaponIndex != 1)
+		if (ItemStatusComponent->GetCurrentWeaponIndex() != 1)
 		{
 			UE_LOG(LogClass, Warning, TEXT("Switching Slot2"));
 			if (IsSprinting())
@@ -849,12 +794,11 @@ void ABGPlayer::Slot2()
 				AimRelease();
 			}
 
-			//if (CurrentWeapon)
-			//{
-				PreviousWeapon = CurrentWeapon;
-			//}
-			CurrentWeapon = WeaponInventory[1];
-			CurrentWeaponIndex = 1;
+			PreviousWeapon = CurrentWeapon;
+
+			CurrentWeapon = ItemStatusComponent->GetWeapon(1);
+			ItemStatusComponent->SetCurrentWeaponIndex(1);
+			//CurrentWeaponIndex = 1;
 
 			if (BGPlayerController)
 			{
@@ -1009,24 +953,24 @@ void ABGPlayer::RemoveWeapon(ABGWeapon * Weapon, bool bDestroy)
 	// If Weapon valid pointer
 	if (Weapon)
 	{
-		// If Weapon in WeaponInventory
-		if (WeaponInventory.Contains(Weapon))
-		{
-			int32 Index = WeaponInventory.Find(Weapon);
-			WeaponInventory[Index] = nullptr;
-			CurrentWeapon = nullptr;
-			UE_LOG(LogClass, Warning, TEXT("Remove weapon in %d."), Index);
-		}
-		if (bDestroy)
-		{
-			Weapon->Destroy();
-		}
-		else
-		{
-			Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			Weapon->SetActorEnableCollision(ECollisionEnabled::NoCollision);
-			Weapon->SetActorHiddenInGame(true);
-		}
+		//// If Weapon in WeaponInventory
+		//if (WeaponInventory.Contains(Weapon))
+		//{
+		//	int32 Index = WeaponInventory.Find(Weapon);
+		//	WeaponInventory[Index] = nullptr;
+		//	CurrentWeapon = nullptr;
+		//	UE_LOG(LogClass, Warning, TEXT("Remove weapon in %d."), Index);
+		//}
+		//if (bDestroy)
+		//{
+		//	Weapon->Destroy();
+		//}
+		//else
+		//{
+		//	Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		//	Weapon->SetActorEnableCollision(ECollisionEnabled::NoCollision);
+		//	Weapon->SetActorHiddenInGame(true);
+		//}
 	}
 
 }
@@ -1067,5 +1011,10 @@ ABGInteractionActor* ABGPlayer::GetInteractionActorInView()
 	bool bResult = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 
 	return Cast<ABGInteractionActor>(HitResult.GetActor());
+}
+
+ABGWeapon * const ABGPlayer::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
 }
 

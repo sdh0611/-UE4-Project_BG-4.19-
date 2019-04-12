@@ -10,8 +10,14 @@
 UCLASS()
 class PROJECTBG_419_API ABGShop : public ABGInteractionActor
 {
+	enum class EShopState : uint8
+	{
+		SELL,
+		BUY
+	};
+
 	GENERATED_BODY()
-	
+
 public:	
 	// Sets default values for this actor's properties
 	ABGShop();

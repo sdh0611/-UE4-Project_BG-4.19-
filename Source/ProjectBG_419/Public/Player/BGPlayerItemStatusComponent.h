@@ -28,13 +28,18 @@ public:
 public:
 	void AddItem(class ABGItem* NewItem);
 	void AddMoney(int32 NewMoney);
+	class ABGWeapon* EquipWeapon(class ABGWeapon* NewWeapon);
+	void RemoveWeapon(ABGWeapon* NewWeapon, bool bDestroy = true);
 
 public:
 	void SetMoney(int32 NewMoney);
+	void SetCurrentWeaponIndex(int32 NewWeaponIndex);
 
 public:
 	int32 GetCurrentMoney() const;
+	int32 GetCurrentWeaponIndex() const;
 	class ABGItem* const GetItemByName(const FString& ItemName);
+	class ABGWeapon* const GetWeapon(int32 NewWeaponIndex);
 
 public:
 	FOnMoneyChanged OnMoneyChanged;
@@ -46,9 +51,13 @@ private:
 	UPROPERTY()
 	class ABGPlayer* OwnerPlayer;
 
+	UPROPERTY(Transient, VisibleAnywhere, Category = Weapon)
+	TArray<class ABGWeapon*> WeaponInventory;
+
 private:
 	int32 TotalWeight;
 	int32 CurrentWeight;
 	int32 CurrentMoney;
-	
+	int32 CurrentWeaponIndex;
+
 };

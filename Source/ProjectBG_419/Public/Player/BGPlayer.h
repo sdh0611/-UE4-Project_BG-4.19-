@@ -53,7 +53,7 @@ public:
 	class UBGPlayerItemStatusComponent* const GetPlayerItemStatusComponent() const;
 	class UBGHPComponent* const GetHPComponent() const;
 	class ABGInteractionActor* GetInteractionActorInView();
-
+	class ABGWeapon* const GetCurrentWeapon() const;
 
 public:
 	void EquipWeapon(class ABGWeapon* NewWeapon);
@@ -124,7 +124,7 @@ private:
 	float SprintSpeed;
 	float AimSpeed;
 	float CrouchSpeed;
-	int32 CurrentWeaponIndex;
+	//int32 CurrentWeaponIndex;
 	FVector DirectionVector;
 	FRotator Rotation;
 	EViewMode CurrentViewMode = EViewMode::VIEW_TPS;
@@ -166,8 +166,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	class ABGWeapon* PreviousWeapon;
 
-	UPROPERTY(Transient, VisibleAnywhere, Category = Weapon)
-	TArray<class ABGWeapon*> WeaponInventory;
+	//UPROPERTY(Transient, VisibleAnywhere, Category = Weapon)
+	//TArray<class ABGWeapon*> WeaponInventory;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Anim, Meta = (AllowPrivateAccess = true))
 	class UBGPlayerAnimInstance* AnimInstance;
