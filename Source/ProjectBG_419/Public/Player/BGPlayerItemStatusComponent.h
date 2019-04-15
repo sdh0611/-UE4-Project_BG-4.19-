@@ -13,7 +13,7 @@ class PROJECTBG_419_API UBGPlayerItemStatusComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UBGPlayerItemStatusComponent();
 
@@ -21,15 +21,19 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
 	void AddItem(class ABGItem* NewItem);
+	void RemoveItem(class ABGItem* NewItem);
 	void AddMoney(int32 NewMoney);
+	//반환할 값은 Player가 들고있어야 할 무기의 포인터.
 	class ABGWeapon* EquipWeapon(class ABGWeapon* NewWeapon);
 	void RemoveWeapon(ABGWeapon* NewWeapon, bool bDestroy = true);
+
+
 
 public:
 	void SetMoney(int32 NewMoney);

@@ -41,6 +41,7 @@ ABGWeapon::ABGWeapon()
 	FireTimer = 0.f;
 	CurrentAmmo = 0;
 	bWantsToFire = false;
+	WeaponInventoryIndex = -1;
 	//bNeedToReload = true;
 
 	ProjectileClass = ABGProjectile::StaticClass();
@@ -113,7 +114,7 @@ void ABGWeapon::Reload()
 	if (CurrentAmmo < MaxAmmo)
 	{
 		CurrentAmmo = MaxAmmo;
-		OnCurrentAmmoVarying.Execute();
+		OnCurrentAmmoVarying.Broadcast();
 	}
 }
 
@@ -165,7 +166,7 @@ void ABGWeapon::InitItemData(FBGItemData* NewItemData)
 
 }
 
-void ABGWeapon::Dropped()
+void ABGWeapon::OnDropped()
 {
 	
 
@@ -175,6 +176,16 @@ void ABGWeapon::Dropped()
 //{
 //	WeaponOwner = Player;
 //}
+
+void ABGWeapon::SetWeaponInventoryIndex(int32 NewIndex)
+{
+	if (!FMath::IsWithinInclusive<int32>(NewIndex, 0, 4))
+	{
+		return;
+	}
+
+	WeaponInventoryIndex = NewIndex;
+}
 
 bool ABGWeapon::IsCanReload() const
 {
@@ -189,6 +200,16 @@ bool ABGWeapon::IsNeedToReload() const
 int32 ABGWeapon::GetCurrentAmmo() const
 {
 	return CurrentAmmo;
+}
+
+int32 ABGWeapon::GetMaxAmmo() const
+{
+	return MaxAmmo;
+}
+
+int32 ABGWeapon::GetWeaponInventoryIndex() const
+{
+	return WeaponInventoryIndex;
 }
 
 EWeaponType ABGWeapon::GetWeaponType() const

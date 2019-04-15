@@ -64,6 +64,11 @@ void ABGItem::InitItemData(FBGItemData * NewItemData)
 	}
 }
 
+void ABGItem::OnDropped()
+{
+	OnItemDropped.Broadcast();
+}
+
 void ABGItem::SetNumberOfItem(int32 NewItemNumber)
 {
 	if (NewItemNumber < 0)

@@ -88,6 +88,13 @@ void UBGShopWidget::AddItemRow(FBGShopItemData * NewItemData)
 
 }
 
+void UBGShopWidget::AddItemRowToSellList(FBGShopItemData * NewItemData)
+{
+
+
+
+}
+
 void UBGShopWidget::BeginDestroy()
 {
 	Super::BeginDestroy();
@@ -126,11 +133,6 @@ void UBGShopWidget::OnExitButtonClicked()
 	//RemoveFromParent();
 }
 
-//void UBGShopWidget::OnBuyButtonClicked()
-//{
-//	//OnBuyItem.Execute();
-//	
-//}
 
 void UBGShopWidget::InitShopTab(const FName& TabName, FBGShopItemData* NewItemData)
 {

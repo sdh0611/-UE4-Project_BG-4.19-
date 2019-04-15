@@ -28,6 +28,7 @@ public:
 
 public:
 	void AddItemRow(FBGShopItemData* NewItemData);
+	void AddItemRowToSellList(FBGShopItemData* NewItemData);
 
 public:
 	virtual void BeginDestroy() override;
@@ -39,9 +40,6 @@ protected:
 private:
 	UFUNCTION()
 	void OnExitButtonClicked();
-
-	//UFUNCTION()
-	//void OnBuyButtonClicked();
 
 //public:
 //	FOnBuyItem OnBuyItem;

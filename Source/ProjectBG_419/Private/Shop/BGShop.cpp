@@ -92,10 +92,10 @@ void ABGShop::OnInteraction(APawn* Pawn)
 			{
 				if (!HUD->IsShopOnScreen())
 				{
+					EnterPlayer = Player;
 					HUD->DrawShopWidgetOnScreen();
 					HUD->GetShopWidget()->BindShopPointer(this);
 					ConstructShopWidget(PlayerController);					
-					EnterPlayer = Player;
 				}
 			}
 		}

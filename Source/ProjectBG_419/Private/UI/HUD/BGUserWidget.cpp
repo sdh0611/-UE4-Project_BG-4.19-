@@ -35,7 +35,7 @@ void UBGUserWidget::BindWeaponInfo(ABGWeapon * Weapon)
 
 	CurrentWeapon = Weapon;
 	Weapon->OnWeaponFire.AddUObject(this, &UBGUserWidget::UpdateCurrentAmmo);
-	Weapon->OnCurrentAmmoVarying.BindUObject(this, &UBGUserWidget::UpdateCurrentAmmo);
+	Weapon->OnCurrentAmmoVarying.AddUObject(this, &UBGUserWidget::UpdateCurrentAmmo);
 	CurrentAmmoTxt->SetVisibility(ESlateVisibility::Visible);
 	TotalAmmoTxt->SetVisibility(ESlateVisibility::Visible);
 	UpdateCurrentAmmo();

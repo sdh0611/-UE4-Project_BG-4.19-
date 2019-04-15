@@ -10,6 +10,7 @@
 #include "BGPlayerItemStatusComponent.h"
 #include "BGUserWidget.h"
 #include "BGInventoryWidget.h"
+#include "BGWeaponInventoryWidget.h"
 #include "BGHUD.h"
 #include "BGGameInstance.h"
 #include "ConstructorHelpers.h"
@@ -333,6 +334,9 @@ void ABGPlayer::EquipWeapon(ABGWeapon * NewWeapon)
 	if (BGPlayerController)
 	{
 		BGPlayerController->GetBGHUD()->GetUserWidget()->BindWeaponInfo(CurrentWeapon);
+		UE_LOG(LogClass, Warning, TEXT("Index : %d"), NewWeapon->GetWeaponInventoryIndex());
+			BGPlayerController->GetBGHUD()->GetInventoryWidget()->
+			GetWeaponInvnetoryWidget(NewWeapon->GetWeaponInventoryIndex())->BindWeapon(NewWeapon);
 	}
 
 }
@@ -481,7 +485,7 @@ void ABGPlayer::ViewChange()
 
 void ABGPlayer::Aim()
 {
-	if (!GetCharacterMovement()->IsFalling() && !IsReloading() && !IsSwitchingWeapon())
+	if (!GetCharacterMovement()->IsFalling() && !IsReloading() && !IsSwitchingWeapon() && (nullptr != CurrentWeapon))
 	{
 		if (IsSprinting())
 		{
@@ -641,6 +645,7 @@ void ABGPlayer::DropWeapon()
 {
 	if (CurrentWeapon)
 	{
+		UE_LOG(LogClass, Warning, TEXT("Drop"));
 		FVector CamLoc;
 		FRotator CamRot;
 		BGPlayerController->GetPlayerViewPoint(CamLoc, CamRot);
@@ -680,6 +685,7 @@ void ABGPlayer::DropWeapon()
 				auto BGGameInstance = Cast<UBGGameInstance>(GetGameInstance());
 				if (BGGameInstance)
 				{
+					// Create Pickup
 					auto PickupMesh = BGGameInstance->GetStaticMesh(CurrentWeapon->GetWeaponName());
 					if (PickupMesh)
 					{
@@ -692,10 +698,20 @@ void ABGPlayer::DropWeapon()
 					}
 					MeshComp->SetSimulatePhysics(true);
 					MeshComp->AddTorqueInRadians(FVector(1.f, 1.f, 1.f) * 400000.f);
+
+					//Update Weapon state
 					NewWeaponPickup->SetWeapon(CurrentWeapon);
 					ItemStatusComponent->RemoveWeapon(CurrentWeapon, false);
+					
+					//Update Widget
 					BGPlayerController->GetBGHUD()->GetUserWidget()->BindWeaponInfo(nullptr);
+					BGPlayerController->GetBGHUD()->GetInventoryWidget()->
+						GetWeaponInvnetoryWidget(CurrentWeapon->GetWeaponInventoryIndex())->ClearWidget();
+
 					AnimInstance->SetIsEquipWeapon(false);
+					
+					CurrentWeapon = nullptr;
+					
 					UE_LOG(LogClass, Warning, TEXT("Spawn pickup success."));
 				}
 				else

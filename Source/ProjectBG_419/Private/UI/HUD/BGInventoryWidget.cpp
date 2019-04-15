@@ -2,8 +2,10 @@
 
 #include "BGInventoryWidget.h"
 #include "BGInventoryItemWidget.h"
+#include "BGWeaponInventoryWidget.h"
 #include "BGItem.h"
 #include "BGPlayerController.h"
+#include "BGWeapon.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/ScrollBox.h"
@@ -19,6 +21,15 @@ UBGInventoryWidget::UBGInventoryWidget(const FObjectInitializer & ObjectInitiali
 	{
 		InventoryItemWidgetClass = UI_InventoryItem.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UBGWeaponInventoryWidget>
+		UI_WeaponInventory(TEXT("WidgetBlueprint'/Game/UI/UI_UserWeaponInfo.UI_UserWeaponInfo_C'"));
+	if (UI_WeaponInventory.Succeeded())
+	{
+		WeaponInventoryWidgetClass = UI_WeaponInventory.Class;
+	}
+
+	WeaponWidgetList.Init(nullptr, 5);
 
 	bIsWidgetOnScreen = false;
 	ItemHolder = nullptr;
@@ -38,6 +49,31 @@ void UBGInventoryWidget::NativeConstruct()
 		UE_LOG(LogClass, Error, TEXT("Cannot find item holder.."));
 	}
 
+	UScrollBox* NewWeaponHolder = Cast<UScrollBox>(GetWidgetFromName(TEXT("WeaponHolder")));
+	if (NewWeaponHolder)
+	{
+		WeaponHolder = NewWeaponHolder;
+		//WeaponInventory 초기화 코드 넣어줄 것.
+		auto PlayerController = Cast<ABGPlayerController>(GetWorld()->GetFirstPlayerController());
+		for (auto& WeaponWidget : WeaponWidgetList)
+		{
+			auto NewWeaponWidget = CreateWidget<UBGWeaponInventoryWidget>(PlayerController, WeaponInventoryWidgetClass);
+			if (NewWeaponWidget)
+			{
+				WeaponWidget = NewWeaponWidget;
+				WeaponHolder->AddChild(WeaponWidget);
+				WeaponWidget->SetPadding(5.f);
+			}
+		}
+
+	}
+	else
+	{
+		UE_LOG(LogClass, Error, TEXT("Cannot find weapon holder.."));
+	}
+
+
+
 	SetIsWidgetOnScreen(true);
 
 	UE_LOG(LogClass, Warning, TEXT("Draw Inventory"));
@@ -54,10 +90,8 @@ void UBGInventoryWidget::RemoveFromParent()
 
 void UBGInventoryWidget::AddItemToInventoryWidget(class APlayerController* PlayerController, ABGItem * NewItem)
 {
-	//auto PlayerController = GetOwningPlayer();
 	if (ItemHolder)
 	{
-		//NewInventoryItem->AddToViewport();
 		UBGInventoryItemWidget* NewInventoryItem = CreateWidget<UBGInventoryItemWidget>(PlayerController, InventoryItemWidgetClass);
 		if (NewInventoryItem)
 		{
@@ -76,8 +110,46 @@ void UBGInventoryWidget::AddItemToInventoryWidget(class APlayerController* Playe
 
 }
 
+void UBGInventoryWidget::AddWeaponToInventoryWidget(APlayerController * PlayerController, ABGWeapon * NewWeapon)
+{
+	if (WeaponHolder)
+	{
+		UBGWeaponInventoryWidget* NewWeaponInventory = CreateWidget<UBGWeaponInventoryWidget>(PlayerController, WeaponInventoryWidgetClass);
+		if (NewWeaponInventory)
+		{
+			UE_LOG(LogClass, Warning, TEXT("Add weapon to weapon holder.."));
+			WeaponHolder->AddChild(NewWeaponInventory);
+			NewWeaponInventory->BindWeapon(NewWeapon);
+			NewWeaponInventory->SetPadding(5.f);
+			NewWeapon->OnWeaponFire.AddUObject(NewWeaponInventory, &UBGWeaponInventoryWidget::UpdateCurrentAmmoText);
+		}
+
+	}
+
+}
+
+void UBGInventoryWidget::AddWeaponToInventoryWidget(ABGWeapon * NewWeapon)
+{
+	if (WeaponHolder)
+	{
+		if (NewWeapon)
+		{
+			auto WeaponWidget = WeaponWidgetList[NewWeapon->GetWeaponInventoryIndex()];
+			WeaponWidget->BindWeapon(NewWeapon);
+			NewWeapon->OnWeaponFire.AddUObject(WeaponWidget, &UBGWeaponInventoryWidget::UpdateCurrentAmmoText);
+		}
+	}
+
+}
+
 void UBGInventoryWidget::RemoveItemFromInventoryWidget()
 {
+
+}
+
+void UBGInventoryWidget::RemoveWeaponFromInventoryWidget()
+{
+
 }
 
 void UBGInventoryWidget::SetIsWidgetOnScreen(bool NewState)
@@ -88,6 +160,16 @@ void UBGInventoryWidget::SetIsWidgetOnScreen(bool NewState)
 bool UBGInventoryWidget::IsWidgetOnScreeen() const
 {
 	return bIsWidgetOnScreen;
+}
+
+UBGWeaponInventoryWidget * const UBGInventoryWidget::GetWeaponInvnetoryWidget(int32 NewWeaponIndex)
+{
+	if (!FMath::IsWithinInclusive<int32>(NewWeaponIndex, 0, 5))
+	{
+		return nullptr;
+	}
+
+	return WeaponWidgetList[NewWeaponIndex];
 }
 
 void UBGInventoryWidget::ConstructWidget()

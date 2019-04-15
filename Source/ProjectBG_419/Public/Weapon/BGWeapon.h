@@ -7,7 +7,7 @@
 #include "BGWeapon.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnWeaponFire);
-DECLARE_DELEGATE(FOnCurrentAmmoVarying);
+DECLARE_MULTICAST_DELEGATE(FOnCurrentAmmoVarying);
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -135,15 +135,18 @@ public:
 	//UFUNCTION()
 	void Reload();
 	virtual void InitItemData(struct FBGItemData* NewItemData) override;
-	void Dropped();
+	virtual void OnDropped() override;
 
 public:
 	//void SetWeaponOwner(class ABGPlayer* Player);
+	void SetWeaponInventoryIndex(int32 NewIndex);
 
 public:
 	bool IsCanReload() const;
 	bool IsNeedToReload() const;
 	int32 GetCurrentAmmo() const;
+	int32 GetMaxAmmo() const;
+	int32 GetWeaponInventoryIndex() const;
 	EWeaponType GetWeaponType() const;
 	const FString& GetWeaponName() const;
 
@@ -179,8 +182,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Weapon )
 	int32 CurrentAmmo;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon )
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	bool bWantsToFire;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	int32 WeaponInventoryIndex;
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon )
 	FVector MuzzleLocation;

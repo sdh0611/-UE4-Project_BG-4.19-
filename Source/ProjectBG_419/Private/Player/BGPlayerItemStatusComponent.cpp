@@ -83,6 +83,15 @@ void UBGPlayerItemStatusComponent::AddItem(ABGItem * NewItem)
 	}
 }
 
+void UBGPlayerItemStatusComponent::RemoveItem(ABGItem * NewItem)
+{
+	if (ItemList.Contains(NewItem))
+	{
+		ItemList.RemoveSingle(NewItem);
+	}
+
+}
+
 void UBGPlayerItemStatusComponent::SetMoney(int32 NewMoney)
 {
 	if (NewMoney >= 0)
@@ -109,10 +118,15 @@ void UBGPlayerItemStatusComponent::AddMoney(int32 NewMoney)
 	OnMoneyChanged.Execute();
 }
 
-//반환할 값은 Player가 들고있어야 할 무기의 포인터.
 ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 {
 	ABGWeapon* Weapon = nullptr;
+
+	// ItemList에 추가
+	//AddItem(NewWeapon);
+
+	// Player의 WeaponInventory에 배정될 Index
+	int32 NewWeaponIndex = -1;
 
 	switch (NewWeapon->GetWeaponType())
 	{
@@ -135,13 +149,15 @@ ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 				SetCurrentWeaponIndex(0);
 				WeaponInventory[CurrentWeaponIndex] = NewWeapon;
 				Weapon = NewWeapon;
+				NewWeaponIndex = 0;
+
 			}
 			else if (nullptr == WeaponInventory[0] || nullptr == WeaponInventory[1])
 			{
 				//1, 2 슬롯 중 하나만 주무기가 있는 경우
 				if (nullptr == WeaponInventory[0])
 				{
-					//UE_LOG(LogClass, Warning, TEXT("Inventory 1-1!"));
+					UE_LOG(LogClass, Warning, TEXT("Inventory 1-1!"));
 					WeaponInventory[0] = NewWeapon;
 					//현재 무기를 장착중이지 않다면
 					if (nullptr == OwnerPlayer->GetCurrentWeapon())
@@ -149,11 +165,12 @@ ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 						SetCurrentWeaponIndex(0);
 						Weapon = NewWeapon;
 					}
+					NewWeaponIndex = 0;
 
 				}
 				else if (nullptr == WeaponInventory[1])
 				{
-					//UE_LOG(LogClass, Warning, TEXT("Inventory 1-2!"));
+					UE_LOG(LogClass, Warning, TEXT("Inventory 1-2!"));
 					WeaponInventory[1] = NewWeapon;
 					//현재 무기를 장착중이지 않다면
 					if (nullptr == OwnerPlayer->GetCurrentWeapon())
@@ -161,17 +178,20 @@ ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 						SetCurrentWeaponIndex(1);
 						Weapon = NewWeapon;
 					}
-					
+					NewWeaponIndex = 1;
+
 				}
 			}
 			else
 			{
 				//1, 2 주무기 슬롯이 전부 차 있을 경우
 				//현재 착용중인 무기를 WeaponPickup으로 돌려놓고 CurrentWeapon을 습득한 무기로 교체
-				//UE_LOG(LogClass, Warning, TEXT("Change Current Weapon"));
+				UE_LOG(LogClass, Warning, TEXT("Change Current Weapon"));
 				Weapon = NewWeapon;
 				WeaponInventory[CurrentWeaponIndex] = NewWeapon;
+				NewWeaponIndex = CurrentWeaponIndex;
 			}
+			NewWeapon->SetWeaponInventoryIndex(NewWeaponIndex);
 
 			break;
 		}
@@ -203,6 +223,8 @@ void UBGPlayerItemStatusComponent::RemoveWeapon(ABGWeapon * NewWeapon, bool bDes
 			NewWeapon->SetActorEnableCollision(ECollisionEnabled::NoCollision);
 			NewWeapon->SetActorHiddenInGame(true);
 		}
+		////ItemList에서 제거
+		//RemoveItem(NewWeapon);
 	}
 }
 

@@ -23,13 +23,17 @@ public:
 	   
 public:
 	void AddItemToInventoryWidget(class APlayerController* PlayerController, class ABGItem* NewItem);
+	void AddWeaponToInventoryWidget(class APlayerController* PlayerController, class ABGWeapon* NewWeapon);
+	void AddWeaponToInventoryWidget(class ABGWeapon* NewWeapon);
 	void RemoveItemFromInventoryWidget();
+	void RemoveWeaponFromInventoryWidget();
 
 public:
 	void SetIsWidgetOnScreen(bool NewState);
 
 public:
 	bool IsWidgetOnScreeen() const;
+	class UBGWeaponInventoryWidget* const GetWeaponInvnetoryWidget(int32 NewWeaponIndex);
 
 protected:
 	void ConstructWidget();
@@ -37,9 +41,17 @@ protected:
 protected:
 	bool bIsWidgetOnScreen;
 	TSubclassOf<class UBGInventoryItemWidget> InventoryItemWidgetClass;
+	TSubclassOf<class UBGWeaponInventoryWidget> WeaponInventoryWidgetClass;
+
+protected:
+	UPROPERTY()
+	TArray<class UBGWeaponInventoryWidget*> WeaponWidgetList;
 
 protected:
 	UPROPERTY()
 	class UScrollBox* ItemHolder;
+
+	UPROPERTY()
+	class UScrollBox* WeaponHolder;
 
 };

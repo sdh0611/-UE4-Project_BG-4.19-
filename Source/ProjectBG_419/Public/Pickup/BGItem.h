@@ -7,6 +7,7 @@
 #include "BGItem.generated.h"
 
 DECLARE_DELEGATE(FOnItemInfoChanged);
+DECLARE_MULTICAST_DELEGATE(FOnItemDropped);
 
 
 UENUM(Blueprintable)
@@ -82,6 +83,7 @@ public:
 public:
 	void IncreaseItemNumber(int32 Value);
 	virtual void InitItemData(struct FBGItemData* NewItemData);
+	virtual void OnDropped();
 
 public:
 	void SetNumberOfItem(int32 NewItemNumber);
@@ -98,6 +100,8 @@ public:
 
 public:
 	FOnItemInfoChanged OnItemInfoChanged;
+
+	FOnItemDropped OnItemDropped;
 
 	UPROPERTY(VisibleAnywhere, Category = Item)
 	TSubclassOf<class ABGPickup> PickupClass;
