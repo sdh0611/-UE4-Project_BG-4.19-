@@ -10,13 +10,6 @@
 
 ABGHUD::ABGHUD()
 {
-	//static ConstructorHelpers::FObjectFinder<UTexture2D>
-	//	TEXTURE_Crosshair(TEXT("Texture2D'/Game/Crosshair_fps_tutorial/crosshair.crosshair'"));
-	//if (TEXTURE_Crosshair.Succeeded())
-	//{
-	//	CrosshairTexture = TEXTURE_Crosshair.Object;
-	//}
-
 	static ConstructorHelpers::FClassFinder<UBGUserWidget>
 		UI_HUD_C(TEXT("WidgetBlueprint'/Game/UI/UI_HUDWIdget.UI_HUDWIdget_C'"));
 	if (UI_HUD_C.Succeeded())
@@ -85,17 +78,6 @@ void ABGHUD::BeginPlay()
 void ABGHUD::DrawHUD()
 {
 	Super::DrawHUD();
-
-	//if (CrosshairTexture)
-	//{
-	//	FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-
-	//	FVector2D CrosshairDrawPosition(Center.X - CrosshairTexture->GetSurfaceWidth() * 0.5f, Center.Y - (CrosshairTexture->GetSurfaceHeight() * 0.5f));
-
-	//	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTexture->Resource, FLinearColor::White);
-	//	TileItem.BlendMode = SE_BLEND_Translucent;
-	//	Canvas->DrawItem(TileItem);
-	//}
 
 }
 

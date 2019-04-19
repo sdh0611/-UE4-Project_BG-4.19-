@@ -140,10 +140,12 @@ public:
 public:
 	//void SetWeaponOwner(class ABGPlayer* Player);
 	void SetWeaponInventoryIndex(int32 NewIndex);
+	void SetIsEquippedByPlayer(bool NewState);
 
 public:
 	bool IsCanReload() const;
 	bool IsNeedToReload() const;
+	bool IsEquippedByPlayer() const;
 	int32 GetCurrentAmmo() const;
 	int32 GetMaxAmmo() const;
 	int32 GetWeaponInventoryIndex() const;
@@ -179,11 +181,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Weapon )
 	float FireTimer;
 
-	UPROPERTY(EditDefaultsOnly, Category = Weapon )
+	UPROPERTY(VisibleAnywhere, Category = Weapon )
 	int32 CurrentAmmo;
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	bool bWantsToFire;
+
+	//정확히는 Player의 WeaponInventory에 올라가 있는지
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	bool bIsEquipped;
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	int32 WeaponInventoryIndex;

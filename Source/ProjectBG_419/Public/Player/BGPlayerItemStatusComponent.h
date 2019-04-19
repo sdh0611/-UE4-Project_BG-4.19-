@@ -27,7 +27,10 @@ public:
 
 public:
 	void AddItem(class ABGItem* NewItem);
-	void RemoveItem(class ABGItem* NewItem);
+	void RemoveItem(class ABGItem* NewItem, bool bDestroy = true);
+	void RemoveItem(const FString& ItemName, bool bDestroy = true);
+	void RemoveItemEntire(const FString& ItemName, bool bDestroy = true);
+	void RemoveItemEntire(class ABGItem* NewItem, bool bDestroy = true);
 	void AddMoney(int32 NewMoney);
 	//반환할 값은 Player가 들고있어야 할 무기의 포인터.
 	class ABGWeapon* EquipWeapon(class ABGWeapon* NewWeapon);
@@ -42,7 +45,9 @@ public:
 public:
 	int32 GetCurrentMoney() const;
 	int32 GetCurrentWeaponIndex() const;
+	int32 GetNumberOfItemList() const;
 	class ABGItem* const GetItemByName(const FString& ItemName);
+	class ABGItem* const GetItemByIndex(int32 ItemIndex);
 	class ABGWeapon* const GetWeapon(int32 NewWeaponIndex);
 
 public:

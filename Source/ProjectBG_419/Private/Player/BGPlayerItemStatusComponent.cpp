@@ -55,39 +55,74 @@ void UBGPlayerItemStatusComponent::AddItem(ABGItem * NewItem)
 {
 	if (NewItem)
 	{
-		CurrentWeight += NewItem->GetItemWeight();
-		// 해당 아이템이 이미 List에 존재하면 개수 증가,
-		// 없는 경우 List에 추가해줌.
-		auto Item = GetItemByName(NewItem->GetItemName());
-		if (Item)
+		UE_LOG(LogClass, Warning, TEXT("Add Item : %s"), *NewItem->GetItemName());
+
+		// ItemType이 WEAPON인지 체크.
+		// 만약 WEAPON이면 Weapon Inventory에서 Update해야하므로
+		// 일반 Inventory창에 추가하면 안됨.
+		if (EItemType::WEAPON != NewItem->GetItemType())
 		{
-			Item->IncreaseItemNumber(NewItem->GetNumberOfItem());
+			CurrentWeight += NewItem->GetItemWeight();
+			// 해당 아이템이 이미 List에 존재하면 개수 증가, NewItem Destroy
+			// 없는 경우 List에 추가해줌.
+			auto Item = GetItemByName(NewItem->GetItemName());
+			if ((nullptr != Item) && (Item->GetNumberOfItem() < Item->GetMaxNumberOfItem()))
+			{
+				//Item개수 증가 및 Widget Update (BGItem Class 내부의 델리게이트를 호출하여 업데이트함.)
+				Item->AdjustItemNumber(NewItem->GetNumberOfItem());
+				NewItem->Destroy();
+			}
+			else
+			{
+				UE_LOG(LogClass, Warning, TEXT("Add ItemList : %s"), *NewItem->GetItemName());
+				//기존 Player Inventory에 없던 item이므로 추가해줌.
+				ItemList.Add(NewItem);
+
+				// Update InventoryWIdget
+				auto PlayerController = Cast<ABGPlayerController>(OwnerPlayer->GetController());
+				if (PlayerController)
+				{
+					auto InventoryWIdget = Cast<UBGInventoryWidget>(PlayerController->GetBGHUD()->GetInventoryWidget());
+					// 기존 인벤토리에 없는 새로운 item일 경우 Widget에 새로 추가해줌.
+					if (InventoryWIdget && (nullptr == Item))
+					{
+						InventoryWIdget->AddItemToInventoryWidget(PlayerController, NewItem);
+					}
+
+				}
+
+			}
+
 		}
 		else
 		{
 			ItemList.Add(NewItem);
 		}
 
-		// Update InventoryWIdget
-		auto PlayerController = Cast<ABGPlayerController>(OwnerPlayer->GetController());
-		if (PlayerController)
-		{
-			auto InventoryWIdget = Cast<UBGInventoryWidget>(PlayerController->GetBGHUD()->GetInventoryWidget());
-			if (InventoryWIdget && (nullptr == Item))
-			{
-				InventoryWIdget->AddItemToInventoryWidget(PlayerController, NewItem);
-			}
-
-		}
-		
 	}
 }
 
-void UBGPlayerItemStatusComponent::RemoveItem(ABGItem * NewItem)
+void UBGPlayerItemStatusComponent::RemoveItem(ABGItem * NewItem, bool bDestroy)
 {
 	if (ItemList.Contains(NewItem))
 	{
 		ItemList.RemoveSingle(NewItem);
+		if (bDestroy)
+		{
+			NewItem->Destroy();
+		}
+	}
+
+}
+
+void UBGPlayerItemStatusComponent::RemoveItem(const FString & ItemName, bool bDestroy)
+{
+	//Item이 존재하는지 검사
+	auto Item = GetItemByName(ItemName);
+	if (Item)
+	{
+		RemoveItem(Item);
+
 	}
 
 }
@@ -123,7 +158,7 @@ ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 	ABGWeapon* Weapon = nullptr;
 
 	// ItemList에 추가
-	//AddItem(NewWeapon);
+	AddItem(NewWeapon);
 
 	// Player의 WeaponInventory에 배정될 Index
 	int32 NewWeaponIndex = -1;
@@ -184,14 +219,17 @@ ABGWeapon* UBGPlayerItemStatusComponent::EquipWeapon(ABGWeapon * NewWeapon)
 			}
 			else
 			{
-				//1, 2 주무기 슬롯이 전부 차 있을 경우
-				//현재 착용중인 무기를 WeaponPickup으로 돌려놓고 CurrentWeapon을 습득한 무기로 교체
+				// 1, 2 주무기 슬롯이 전부 차 있을 경우
+				// 현재 착용중인 무기를 WeaponPickup으로 돌려놓고 CurrentWeapon을 습득한 무기로 교체
 				UE_LOG(LogClass, Warning, TEXT("Change Current Weapon"));
+				//// 컴포넌트에서 관리하는 ItemList에서 제거
+				//RemoveItem(Weapon, false);
 				Weapon = NewWeapon;
 				WeaponInventory[CurrentWeaponIndex] = NewWeapon;
 				NewWeaponIndex = CurrentWeaponIndex;
 			}
 			NewWeapon->SetWeaponInventoryIndex(NewWeaponIndex);
+			NewWeapon->SetIsEquippedByPlayer(true);
 
 			break;
 		}
@@ -213,6 +251,12 @@ void UBGPlayerItemStatusComponent::RemoveWeapon(ABGWeapon * NewWeapon, bool bDes
 			WeaponInventory[Index] = nullptr;
 			UE_LOG(LogClass, Warning, TEXT("Remove weapon in %d."), Index);
 		}
+
+		NewWeapon->SetIsEquippedByPlayer(false);
+
+		////ItemList에서 제거
+		RemoveItem(NewWeapon, bDestroy);
+
 		if (bDestroy)
 		{
 			NewWeapon->Destroy();
@@ -223,8 +267,7 @@ void UBGPlayerItemStatusComponent::RemoveWeapon(ABGWeapon * NewWeapon, bool bDes
 			NewWeapon->SetActorEnableCollision(ECollisionEnabled::NoCollision);
 			NewWeapon->SetActorHiddenInGame(true);
 		}
-		////ItemList에서 제거
-		//RemoveItem(NewWeapon);
+
 	}
 }
 
@@ -238,6 +281,11 @@ int32 UBGPlayerItemStatusComponent::GetCurrentWeaponIndex() const
 	return CurrentWeaponIndex;
 }
 
+int32 UBGPlayerItemStatusComponent::GetNumberOfItemList() const
+{
+	return ItemList.Num();
+}
+
 ABGItem * const UBGPlayerItemStatusComponent::GetItemByName(const FString & ItemName)
 {
 	for (const auto& Item : ItemList)
@@ -249,6 +297,16 @@ ABGItem * const UBGPlayerItemStatusComponent::GetItemByName(const FString & Item
 	}
 
 	return nullptr;
+}
+
+ABGItem * const UBGPlayerItemStatusComponent::GetItemByIndex(int32 ItemIndex)
+{
+	if (!FMath::IsWithinInclusive<int32>(ItemIndex, 0, ItemList.Num()))
+	{
+		return nullptr;
+	}
+
+	return ItemList[ItemIndex];
 }
 
 ABGWeapon* const UBGPlayerItemStatusComponent::GetWeapon(int32 NewWeaponIndex)

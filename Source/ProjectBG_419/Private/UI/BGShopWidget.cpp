@@ -5,6 +5,7 @@
 #include "BGShop.h"
 #include "BGItem.h"
 #include "BGPlayerController.h"
+#include "BGPlayerItemStatusComponent.h"
 #include "BGHUD.h"
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
@@ -51,7 +52,12 @@ void UBGShopWidget::BindShopPointer(ABGShop * NewShop)
 
 }
 
-void UBGShopWidget::AddItemRow(FBGShopItemData * NewItemData)
+void UBGShopWidget::BindPlayerItemStatus(UBGPlayerItemStatusComponent * NewPlayerItemStatus)
+{
+	PlayerItemStatus = NewPlayerItemStatus;
+}
+
+void UBGShopWidget::AddItemRow(const FBGShopItemData * NewItemData)
 {
 	if (nullptr == NewItemData)
 	{
@@ -63,33 +69,68 @@ void UBGShopWidget::AddItemRow(FBGShopItemData * NewItemData)
 
 	switch (ItemType)
 	{
-	case EItemType::WEAPON:
-	{
-		InitShopTab(TEXT("WeaponItemHolder"), NewItemData);
-		break;
-	}
-	case EItemType::RECOVERY:
-	{
-		InitShopTab(TEXT("RecoveryItemHolder"), NewItemData);
-		break;
-	}
-	case EItemType::DOPING:
-	{
-		InitShopTab(TEXT("DopingItemHolder"), NewItemData);
-		break;
-	}
-	default:
-	{
-		UE_LOG(LogClass, Error, TEXT("Invalid item type in UBGShopWidget::AddItemRow"));
-		break;
-	}
+		case EItemType::WEAPON:
+		{
+			InitShopTab(TEXT("WeaponItemHolder"), NewItemData, false);
+			break;
+		}
+		case EItemType::RECOVERY:
+		{
+			InitShopTab(TEXT("RecoveryItemHolder"), NewItemData, false);
+			break;
+		}
+		case EItemType::DOPING:
+		{
+			InitShopTab(TEXT("DopingItemHolder"), NewItemData, false);
+			break;
+		}
+		default:
+		{
+			UE_LOG(LogClass, Error, TEXT("Invalid item type in UBGShopWidget::AddItemRow"));
+			break;
+		}
 	}
 
 
 }
 
-void UBGShopWidget::AddItemRowToSellList(FBGShopItemData * NewItemData)
+void UBGShopWidget::AddItemRowToSellList(const FBGShopItemData * NewItemData)
 {
+	if (nullptr == NewItemData)
+	{
+		UE_LOG(LogClass, Error, TEXT("Invalid item data in UBGShopWidget::AddItemRowToSellList"));
+		return;
+	}
+
+	//Selling Tab으로 초기화하게끔 수정하자.
+	EItemType ItemType = GetItemTypeFromString(NewItemData->ItemType);
+
+	switch (ItemType)
+	{
+		case EItemType::WEAPON:
+		{
+			UE_LOG(LogClass, Error, TEXT("Add WEAPON"));
+			InitShopTab(TEXT("WeaponItemHolder_Sell"), NewItemData, true);
+			break;
+		}
+		case EItemType::RECOVERY:
+		{
+			UE_LOG(LogClass, Error, TEXT("Add RECOVERY"));
+			InitShopTab(TEXT("RecoveryItemHolder_Sell"), NewItemData, true);
+			break;
+		}
+		case EItemType::DOPING:
+		{
+			UE_LOG(LogClass, Error, TEXT("Add DOPING"));
+			InitShopTab(TEXT("DopingItemHolder_Sell"), NewItemData, true);
+			break;
+		}
+		default:
+		{
+			UE_LOG(LogClass, Error, TEXT("Invalid item type in UBGShopWidget::AddItemRow"));
+			break;
+		}
+	}
 
 
 
@@ -103,6 +144,7 @@ void UBGShopWidget::BeginDestroy()
 
 void UBGShopWidget::OnExitButtonClicked()
 {
+	// 구매탭 Clear
 	auto PlayerController = Cast<ABGPlayerController>(GetOwningPlayer());
 	if (PlayerController)
 	{
@@ -121,6 +163,23 @@ void UBGShopWidget::OnExitButtonClicked()
 
 		}
 
+		// 판매탭 Clear
+		auto SellWidgetSwitcher = Cast<UWidgetSwitcher>(GetWidgetFromName(TEXT("SellingWidgetSwitcher")));
+		if (SellWidgetSwitcher)
+		{
+			int32 Num = SellWidgetSwitcher->GetNumWidgets();
+			for (int32 WidgetIndex = 0; WidgetIndex < Num; ++WidgetIndex)
+			{
+				auto ItemHolder = Cast<UScrollBox>(SellWidgetSwitcher->GetWidgetAtIndex(WidgetIndex));
+				if (ItemHolder)
+				{
+					ItemHolder->ClearChildren();
+				}
+
+			}
+
+		}
+		
 		if (Shop.IsValid())
 		{
 			Shop->OnPlayerExitShop();
@@ -134,7 +193,7 @@ void UBGShopWidget::OnExitButtonClicked()
 }
 
 
-void UBGShopWidget::InitShopTab(const FName& TabName, FBGShopItemData* NewItemData)
+void UBGShopWidget::InitShopTab(const FName& TabName, const FBGShopItemData* NewItemData, bool bInitSellTab)
 {
 	UScrollBox* ScrollBox = Cast<UScrollBox>(GetWidgetFromName(TabName));
 	if (ScrollBox)
@@ -143,13 +202,26 @@ void UBGShopWidget::InitShopTab(const FName& TabName, FBGShopItemData* NewItemDa
 		if (ItemRow)
 		{
 			ItemRow->SetItemData(NewItemData);
+			ItemRow->SetIsSellTab(bInitSellTab);
+
+			// SellTab 초기화일 경우와 아닌 경우 해당 ItemRow의 기능이 달라짐.
+			if (bInitSellTab)
+			{
+				ItemRow->OnItemRowBtnClick.BindLambda([this](const FBGShopItemData& NewItemData)->void
+				{
+					Shop->BuyItemFromPlayer(NewItemData);
+				});
+			}
+			else
+			{
+				ItemRow->OnItemRowBtnClick.BindLambda([this](const FBGShopItemData& NewItemData)->void
+				{
+					Shop->SellItemToPlayer(NewItemData);
+				});
+			}
 
 			ScrollBox->AddChild(ItemRow);
 			ItemRow->SetPadding(5.f);
-			ItemRow->OnBuyItem.BindLambda([this](const FBGShopItemData& NewItemData)->void
-			{
-				Shop->SoldToPlayer(NewItemData);
-			});
 		}
 		else
 		{

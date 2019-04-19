@@ -33,9 +33,9 @@ public:
 	
 public:
 	//Player에게 판매
-	void SoldToPlayer(const FBGShopItemData& NewShopItem);
+	void SellItemToPlayer(const FBGShopItemData& NewShopItem);
 	//Player에게 구매
-	void PurchaseFromPlayer();
+	void BuyItemFromPlayer(const FBGShopItemData& NewShopItem);
 	void OnPlayerExitShop();
 	const FBGShopItemData* const FindShopItemData(const FString& ItemName);
 
@@ -52,12 +52,6 @@ private:
 
 	UPROPERTY()
 	TArray<class ABGItem*> ItemList;
-	
-	//UPROPERTY(VisibleAnywhere, Category = ShopUI)
-	//TSubclassOf<class UBGShopWidget> ShopWidgetClass;
-	//
-	//UPROPERTY(VIsibleAnywhere, Category = ShopUI)
-	//class UBGShopWidget* ShopWidget;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Shop)

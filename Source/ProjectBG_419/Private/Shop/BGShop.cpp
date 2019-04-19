@@ -34,19 +34,6 @@ ABGShop::ABGShop()
 		ShopMesh->SetStaticMesh(SM_Shop.Object);
 	}
 
-
-	//static ConstructorHelpers::FClassFinder<UBGShopWidget>
-	//	UI_Shop(TEXT("WidgetBlueprint'/Game/UI/UI_ShopWidget.UI_ShopWidget_C'"));
-	//if (UI_Shop.Succeeded())
-	//{
-	//	ShopWidgetClass = UI_Shop.Class;
-	//}
-	//else
-	//{
-	//	UE_LOG(LogClass, Error, TEXT("Shop ui not exist.."));
-	//}
-
-
 	static ConstructorHelpers::FObjectFinder<UDataTable>
 		DT_ShopItem(TEXT("DataTable'/Game/GameData/ShopItemData.ShopItemData'"));
 	if (DT_ShopItem.Succeeded())
@@ -66,9 +53,7 @@ ABGShop::ABGShop()
 void ABGShop::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//ShopWidgetClass = CreateWidget(, ShopWidgetClass);
-	
+
 }
 
 // Called every frame
@@ -93,34 +78,19 @@ void ABGShop::OnInteraction(APawn* Pawn)
 				if (!HUD->IsShopOnScreen())
 				{
 					EnterPlayer = Player;
-					HUD->DrawShopWidgetOnScreen();
 					HUD->GetShopWidget()->BindShopPointer(this);
 					ConstructShopWidget(PlayerController);					
+					HUD->DrawShopWidgetOnScreen();
 				}
 			}
 		}
 
-		//if (ShopWidgetClass)
-		//{
-		//	auto PlayerController = Cast<APlayerController>(Player->GetController());
-		//	if (PlayerController)
-		//	{
-		//		ConstructShopWidget(PlayerController);
-		//		PlayerController->bShowMouseCursor = true;
-		//		PlayerController->SetInputMode(FInputModeUIOnly());
-		//		EnterPlayer = Player;
-		//	}
-		//}
-		//else
-		//{
-		//	UE_LOG(LogClass, Error, TEXT("Shop ui invalid."));
-		//}
 	}
 
 
 }
 
-void ABGShop::SoldToPlayer(const FBGShopItemData& NewShopItem)
+void ABGShop::SellItemToPlayer(const FBGShopItemData& NewShopItem)
 {
 	if (EnterPlayer)
 	{
@@ -192,16 +162,43 @@ void ABGShop::SoldToPlayer(const FBGShopItemData& NewShopItem)
 
 }
 
-void ABGShop::PurchaseFromPlayer()
+void ABGShop::BuyItemFromPlayer(const FBGShopItemData& NewShopItem)
 {
 	if (EnterPlayer)
 	{
 		auto PlayerItemStatus = EnterPlayer->GetPlayerItemStatusComponent();
 		if (PlayerItemStatus)
 		{
-			//이부분을 이제 각각의 Item가격에 맞게 값을 조정하고, Player에게 스폰시켜주도록 해보자.
-			PlayerItemStatus->AddMoney(500);
-			
+			// 팔 때의 가격은 구매가의 70%
+			PlayerItemStatus->AddMoney((int32)(NewShopItem.ItemPrice * 0.7f));
+			////인벤토리에서 Item제거
+			//PlayerItemStatus->RemoveItem(NewShopItem.ItemName);
+
+			switch (GetItemTypeFromString(NewShopItem.ItemType))
+			{
+				case EItemType::WEAPON:
+				{
+					//
+
+					break;
+				}
+				case EItemType::RECOVERY:
+				{
+
+					break;
+				}
+				case EItemType::DOPING:
+				{
+
+					break;
+				}
+				default:
+				{
+					UE_LOG(LogClass, Error, TEXT("Invalid Item Type!"));
+					break;
+				}
+			}
+
 		}
 
 	}
@@ -232,28 +229,30 @@ void ABGShop::ConstructShopWidget(ABGPlayerController* PlayerController)
 {
 	auto ShopWidget = PlayerController->GetBGHUD()->GetShopWidget();
 
+	// 구매탭 초기화
 	TArray<FName> Names = ShopItemDataTable->GetRowNames();
 
 	for (auto NameIt = Names.CreateConstIterator(); NameIt; ++NameIt)
 	{
-		//Add ItemData in shop widget
-		FBGShopItemData* ShopItem = ShopItemDataTable->FindRow<FBGShopItemData>(*NameIt, TEXT(""));
+		// Add ItemData in shop widget
+		// 상점의 판매탭과 구매탭 초기화 시켜줄 것.
+		const FBGShopItemData* ShopItem = ShopItemDataTable->FindRow<FBGShopItemData>(*NameIt, TEXT(""));
 		ShopWidget->AddItemRow(ShopItem);
 	}
-	
-	//ShopWidget = CreateWidget<UBGShopWidget>(PlayerController, ShopWidgetClass);
 
-	//TArray<FName> Names = ShopItemDataTable->GetRowNames();
+	// 판매탭 초기화
+	auto PlayerItemStatus = EnterPlayer->GetPlayerItemStatusComponent();
+	if (PlayerItemStatus)
+	{
+		for (int Index = 0; Index < PlayerItemStatus->GetNumberOfItemList(); ++Index)
+		{
+			UE_LOG(LogClass, Warning, TEXT("SellTab"));
+			// 04.18 : Recovery를 ShopItemData와 일치시켜주지 않아서 상점 판매탭에 안뜨는 현상이 있음.
+			const FBGShopItemData* ShopItem = FindShopItemData(PlayerItemStatus->GetItemByIndex(Index)->GetItemName());
+			ShopWidget->AddItemRowToSellList(ShopItem);
+		}
+	}
 
-	//for (auto NameIt = Names.CreateConstIterator(); NameIt; ++NameIt)
-	//{
-	//	//Add ItemData in shop widget
-	//	FBGShopItemData* ShopItem = ShopItemDataTable->FindRow<FBGShopItemData>(*NameIt, TEXT(""));
-	//	ShopWidget->AddItemRow(ShopItem);
-	//}
-
-	//ShopWidget->AddToViewport();
-	//ShopWidget->BindShopPointer(this);
 
 }
 

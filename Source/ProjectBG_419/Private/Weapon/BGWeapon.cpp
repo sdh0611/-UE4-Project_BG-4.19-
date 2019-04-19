@@ -43,6 +43,7 @@ ABGWeapon::ABGWeapon()
 	bWantsToFire = false;
 	WeaponInventoryIndex = -1;
 	//bNeedToReload = true;
+	MaxNumberOfItem = 1;
 
 	ProjectileClass = ABGProjectile::StaticClass();
 
@@ -187,6 +188,11 @@ void ABGWeapon::SetWeaponInventoryIndex(int32 NewIndex)
 	WeaponInventoryIndex = NewIndex;
 }
 
+void ABGWeapon::SetIsEquippedByPlayer(bool NewState)
+{
+	bIsEquipped = NewState;
+}
+
 bool ABGWeapon::IsCanReload() const
 {
 	return CurrentAmmo < MaxAmmo;
@@ -195,6 +201,11 @@ bool ABGWeapon::IsCanReload() const
 bool ABGWeapon::IsNeedToReload() const
 {
 	return CurrentAmmo <= 0;
+}
+
+bool ABGWeapon::IsEquippedByPlayer() const
+{
+	return bIsEquipped;
 }
 
 int32 ABGWeapon::GetCurrentAmmo() const

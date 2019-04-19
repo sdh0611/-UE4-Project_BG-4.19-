@@ -16,15 +16,15 @@
 	},
 	"BuildProducts": [
 		{
-			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-ProjectBG_419-5563.dll",
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-ProjectBG_419-421.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-ProjectBG_419-5563.pdb",
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-ProjectBG_419-421.pdb",
 			"Type": "SymbolFile"
 		},
 		{
-			"Path": "$(ProjectDir)/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-ProjectBG_419-5563.lib",
+			"Path": "$(ProjectDir)/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-ProjectBG_419-421.lib",
 			"Type": "ImportLibrary"
 		},
 		{

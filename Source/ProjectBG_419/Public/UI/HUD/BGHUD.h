@@ -39,9 +39,6 @@ protected:
 	bool bIsShopOnScreen;
 
 protected:
-	//UPROPERTY(EditDefaultsOnly)
-	//class UTexture2D* CrosshairTexture;
-
 	UPROPERTY(VisibleAnywhere, Category = HUD)
 	TSubclassOf<class UBGUserWidget> UserWidgetClass;
 	

@@ -81,7 +81,7 @@ public:
 	virtual void OnUsed();
 
 public:
-	void IncreaseItemNumber(int32 Value);
+	void AdjustItemNumber(int32 Value);
 	virtual void InitItemData(struct FBGItemData* NewItemData);
 	virtual void OnDropped();
 
@@ -94,6 +94,7 @@ public:
 	const class UTexture2D* GetItemTexture() const;
 	const ABGPlayer* GetItemOwner() const;
 	int32 GetNumberOfItem() const;
+	int32 GetMaxNumberOfItem() const;
 	int32 GetItemWeight() const;
 	const FString& GetItemName() const;
 	EItemType GetItemType() const;
@@ -114,8 +115,13 @@ protected:
 	class ABGPlayer* ItemOwner;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item)
+	//현재 아이템의 수량
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, Transient)
 	int32 NumberOfItem;
+
+	//한꺼번에 들 수 있는 최대 수량
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item)
+	int32 MaxNumberOfItem;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item)
 	int32 ItemWeight;

@@ -25,17 +25,18 @@ protected:
 
 public:
 	void BindShopPointer(class ABGShop* NewShop);
+	void BindPlayerItemStatus(class UBGPlayerItemStatusComponent* NewPlayerItemStatus);
 
 public:
-	void AddItemRow(FBGShopItemData* NewItemData);
-	void AddItemRowToSellList(FBGShopItemData* NewItemData);
+	void AddItemRow(const FBGShopItemData* NewItemData);
+	void AddItemRowToSellList(const FBGShopItemData* NewItemData);
 
 public:
 	virtual void BeginDestroy() override;
 
 protected:
 	//UFUNCTION(BlueprintCallable, Category = ShopWidget)
-	void InitShopTab(const FName& TabName, FBGShopItemData* NewItemData);
+	void InitShopTab(const FName& TabName, const FBGShopItemData* NewItemData, bool bInitSellTab);
 
 private:
 	UFUNCTION()
@@ -53,6 +54,9 @@ protected:
 	class UButton* ShopExitButton;
 
 	UPROPERTY()
-	TWeakObjectPtr<ABGShop> Shop;
+	TWeakObjectPtr<class ABGShop> Shop;
+
+	UPROPERTY()
+	TWeakObjectPtr<class UBGPlayerItemStatusComponent> PlayerItemStatus;
 
 };

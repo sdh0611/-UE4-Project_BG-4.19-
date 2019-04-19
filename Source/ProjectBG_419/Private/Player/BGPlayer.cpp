@@ -311,12 +311,15 @@ void ABGPlayer::EquipWeapon(ABGWeapon * NewWeapon)
 	//Set weapon owner
 	NewWeapon->SetItemOwner(this);
 
+	// Weapon 포인터가 가리키는 값은 Player가 들게 될 무기의 포인터값이다.
 	ABGWeapon* Weapon = ItemStatusComponent->EquipWeapon(NewWeapon);
 	if (Weapon)
 	{
+		// 이미 주무기 슬롯(1, 2번)이 다 차있는 경우.
 		if (nullptr != CurrentWeapon)
 		{
 			UE_LOG(LogClass, Warning, TEXT("DropWeapon"));
+			//ItemStatusComponent->RemoveItem(Weapon, false);
 			DropWeapon();
 		}
 

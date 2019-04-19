@@ -37,18 +37,25 @@ void UBGShopItemRowWidget::NativeConstruct()
 	if (NewPriceTextBlock)
 	{
 		ItemName = NewPriceTextBlock;
-		ItemPrice->SetText(FText::FromString(FString::FromInt(ItemData.ItemPrice).Append(TEXT(" $"))));
+		if (IsSellTab())
+		{
+			ItemPrice->SetText(FText::FromString(FString::FromInt((int32)(ItemData.ItemPrice * 0.7f)).Append(TEXT(" $"))));
+		}
+		else
+		{
+			ItemPrice->SetText(FText::FromString(FString::FromInt(ItemData.ItemPrice).Append(TEXT(" $"))));
+		}
 	}
 	else
 	{
 		UE_LOG(LogClass, Error, TEXT("NewPrice invalid in UBGShopItemRowWidget::SetItemData"));
 	}
 
-	UButton* NewBuyButton = Cast<UButton>(GetWidgetFromName(TEXT("BTN_Buy")));
-	if (NewBuyButton)
+	UButton* NewButton = Cast<UButton>(GetWidgetFromName(TEXT("BTN_Buy")));
+	if (NewButton)
 	{
-		BuyButton = NewBuyButton;
-		BuyButton->OnClicked.AddDynamic(this, &UBGShopItemRowWidget::OnBuyButtonClicked);
+		Button = NewButton;
+		Button->OnClicked.AddDynamic(this, &UBGShopItemRowWidget::OnButtonClicked);
 	}
 	else
 	{
@@ -58,7 +65,7 @@ void UBGShopItemRowWidget::NativeConstruct()
 
 }
 
-void UBGShopItemRowWidget::SetItemData(FBGShopItemData * NewItemData)
+void UBGShopItemRowWidget::SetItemData(const FBGShopItemData * NewItemData)
 {
 	if (nullptr == NewItemData)
 	{
@@ -70,12 +77,22 @@ void UBGShopItemRowWidget::SetItemData(FBGShopItemData * NewItemData)
 
 }
 
+void UBGShopItemRowWidget::SetIsSellTab(bool NewState)
+{
+	bIsSellTab = NewState;
+}
+
+bool UBGShopItemRowWidget::IsSellTab() const
+{
+	return bIsSellTab;
+}
+
 const FBGShopItemData& UBGShopItemRowWidget::GetItemData() const
 {
 	return ItemData;
 }
 
-void UBGShopItemRowWidget::OnBuyButtonClicked()
+void UBGShopItemRowWidget::OnButtonClicked()
 {
-	OnBuyItem.Execute(ItemData);
+	OnItemRowBtnClick.Execute(ItemData);
 }

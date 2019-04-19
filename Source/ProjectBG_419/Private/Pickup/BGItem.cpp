@@ -13,6 +13,7 @@ ABGItem::ABGItem()
 	ItemTexture = nullptr;
 	ItemOwner = nullptr;
 	NumberOfItem = 1;
+	MaxNumberOfItem = 999;
 	ItemWeight = 0;
 	ItemName = TEXT("Default");
 	ItemType = EItemType::DEFAULT;
@@ -34,24 +35,31 @@ void ABGItem::Tick(float DeltaTime)
 
 void ABGItem::OnUsed()
 {
-	if (NumberOfItem <= 0)
-	{
-		Destroy();
-	}
-	else
-	{
-		--NumberOfItem;
-		OnItemInfoChanged.Execute();
-	}
+	AdjustItemNumber(-1);
+	//if (--NumberOfItem <= 0)
+	//{
+	//	UE_LOG(LogClass, Warning, TEXT("Item Destroy"));
+	//	Destroy();
+	//}
+	//else
+	//{
+	//	UE_LOG(LogClass, Warning, TEXT("Item Decrease"));
+	//	OnItemInfoChanged.Execute();
+	//}
 }
 
-void ABGItem::IncreaseItemNumber(int32 Value)
+void ABGItem::AdjustItemNumber(int32 Value)
 {
 	int32 NewNumberOfItem = NumberOfItem + Value;
 
 	NumberOfItem = FMath::Clamp<int32>(NewNumberOfItem, 0, NewNumberOfItem);
 
 	OnItemInfoChanged.Execute();
+
+	if (NumberOfItem <= 0)
+	{
+		Destroy();
+	}
 }
 
 void ABGItem::InitItemData(FBGItemData * NewItemData)
@@ -97,6 +105,11 @@ const ABGPlayer * ABGItem::GetItemOwner() const
 int32 ABGItem::GetNumberOfItem() const
 {
 	return NumberOfItem;
+}
+
+int32 ABGItem::GetMaxNumberOfItem() const
+{
+	return MaxNumberOfItem;
 }
 
 int32 ABGItem::GetItemWeight() const

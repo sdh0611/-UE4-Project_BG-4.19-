@@ -7,7 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "BGShopItemRowWidget.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnBuyItem, const FBGShopItemData&);
+DECLARE_DELEGATE_OneParam(FOnItemRowBtnClick, const FBGShopItemData&);
 
 /**
  * 
@@ -22,15 +22,20 @@ public:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetItemData(FBGShopItemData* NewItemData);
+	void SetItemData(const FBGShopItemData* NewItemData);
+	void SetIsSellTab(bool NewState);
+
+public:
+	bool IsSellTab() const;
 	const FBGShopItemData& GetItemData() const;
+
 
 private:
 	UFUNCTION()
-	void OnBuyButtonClicked();
+	void OnButtonClicked();
 
 public:
-	FOnBuyItem OnBuyItem;
+	FOnItemRowBtnClick OnItemRowBtnClick;
 
 private:
 	FBGShopItemData ItemData;
@@ -46,6 +51,9 @@ private:
 	class UTextBlock* ItemPrice;
 
 	UPROPERTY()
-	class UButton* BuyButton;
+	class UButton* Button;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ShopItemRow, Meta = (AllowPrivateAccess = true))
+	bool bIsSellTab = false;
 
 };
